@@ -4,10 +4,12 @@
     "customerName": "Arjun Nair",
     "amount": 2350,
     "type": "payment_failed",
-    "trueFailureReason": "bank_server_error",
+    "trueFailureReason": "network_failure",
+    "gatewayErrorHint": "Gateway timeout — no response received from the bank within the expected window.",
     "createdAt": "2026-08-10T03:26:00.000Z",
     "status": "pending",
-    "attempts": []
+    "attempts": [],
+    "paymentAttempts": []
   },
   {
     "id": "TXN-0002",
@@ -15,10 +17,12 @@
     "amount": 1850,
     "type": "subscription_failed",
     "trueFailureReason": "insufficient_funds",
+    "gatewayErrorHint": "Declined by issuing bank — reason code 51 (insufficient funds).",
     "createdAt": "2026-08-10T08:25:00.000Z",
     "status": "pending",
     "attempts": [],
-    "customerEmail": "REPLACE_WITH_YOUR_EMAIL@example.com"
+    "customerEmail": "REPLACE_WITH_YOUR_EMAIL@example.com",
+    "paymentAttempts": []
   },
   {
     "id": "TXN-0003",
@@ -26,61 +30,72 @@
     "amount": 7950,
     "type": "payment_failed",
     "trueFailureReason": "insufficient_funds",
+    "gatewayErrorHint": "Bank declined the transaction: insufficient balance in account.",
     "createdAt": "2026-08-11T00:25:00.000Z",
     "status": "pending",
-    "attempts": []
+    "attempts": [],
+    "paymentAttempts": []
   },
   {
     "id": "TXN-0004",
     "customerName": "Kavya Iyer",
     "amount": 9200,
     "type": "payment_failed",
-    "trueFailureReason": "card_expired",
+    "trueFailureReason": "card_failure",
+    "gatewayErrorHint": "Card declined — issuer reports the card has expired.",
     "createdAt": "2026-08-11T16:02:00.000Z",
     "status": "pending",
     "attempts": [],
-    "customerEmail": "REPLACE_WITH_YOUR_EMAIL@example.com"
+    "customerEmail": "REPLACE_WITH_YOUR_EMAIL@example.com",
+    "paymentAttempts": []
   },
   {
     "id": "TXN-0005",
     "customerName": "Siddharth Rao",
     "amount": 13550,
     "type": "payment_failed",
-    "trueFailureReason": "card_expired",
+    "trueFailureReason": "card_failure",
+    "gatewayErrorHint": "Card declined by issuer — reason code 05 (do not honor).",
     "createdAt": "2026-08-12T05:46:00.000Z",
     "status": "pending",
-    "attempts": []
+    "attempts": [],
+    "paymentAttempts": []
   },
   {
     "id": "TXN-0006",
     "customerName": "Rahul Sharma",
     "amount": 850,
     "type": "subscription_failed",
-    "trueFailureReason": "card_expired",
+    "trueFailureReason": "card_failure",
+    "gatewayErrorHint": "Card declined — issuer reports the card is blocked or restricted.",
     "createdAt": "2026-08-13T01:44:00.000Z",
     "status": "pending",
-    "attempts": []
+    "attempts": [],
+    "paymentAttempts": []
   },
   {
     "id": "TXN-0007",
     "customerName": "Pooja Joshi",
     "amount": 2050,
     "type": "checkout_abandoned",
-    "trueFailureReason": "payment_method_declined",
+    "trueFailureReason": "bank_decline",
+    "gatewayErrorHint": "Transaction declined by the issuing bank. No further reason code provided.",
     "createdAt": "2026-08-13T15:35:00.000Z",
     "status": "pending",
-    "attempts": []
+    "attempts": [],
+    "paymentAttempts": []
   },
   {
     "id": "TXN-0008",
     "customerName": "Ishita Rao",
     "amount": 5300,
     "type": "checkout_abandoned",
-    "trueFailureReason": "customer_distraction",
+    "trueFailureReason": "checkout_abandonment",
     "createdAt": "2026-08-15T23:50:00.000Z",
     "status": "pending",
     "attempts": [],
-    "customerEmail": "REPLACE_WITH_YOUR_EMAIL@example.com"
+    "customerEmail": "REPLACE_WITH_YOUR_EMAIL@example.com",
+    "paymentAttempts": []
   },
   {
     "id": "TXN-0009",
@@ -88,79 +103,92 @@
     "amount": 9400,
     "type": "payment_failed",
     "trueFailureReason": "insufficient_funds",
+    "gatewayErrorHint": "Declined by issuing bank — reason code 51 (insufficient funds).",
     "createdAt": "2026-08-16T11:46:00.000Z",
     "status": "pending",
-    "attempts": []
+    "attempts": [],
+    "paymentAttempts": []
   },
   {
     "id": "TXN-0010",
     "customerName": "Sanya Bhatt",
     "amount": 1500,
     "type": "checkout_abandoned",
-    "trueFailureReason": "payment_method_declined",
+    "trueFailureReason": "bank_decline",
+    "gatewayErrorHint": "Transaction declined by the issuing bank. No further reason code provided.",
     "createdAt": "2026-08-16T18:05:00.000Z",
     "status": "pending",
-    "attempts": []
+    "attempts": [],
+    "paymentAttempts": []
   },
   {
     "id": "TXN-0011",
     "customerName": "Karan Malhotra",
     "amount": 2650,
     "type": "subscription_failed",
-    "trueFailureReason": "payment_method_declined",
+    "trueFailureReason": "bank_decline",
+    "gatewayErrorHint": "Transaction declined by the issuing bank. No further reason code provided.",
     "createdAt": "2026-08-18T00:26:00.000Z",
     "status": "pending",
-    "attempts": []
+    "attempts": [],
+    "paymentAttempts": []
   },
   {
     "id": "TXN-0012",
     "customerName": "Ankit Verma",
     "amount": 2850,
     "type": "subscription_failed",
-    "trueFailureReason": "bank_server_error",
+    "trueFailureReason": "network_failure",
+    "gatewayErrorHint": "Payment gateway reported a temporary connectivity error during processing.",
     "createdAt": "2026-08-18T11:14:00.000Z",
     "status": "pending",
-    "attempts": []
+    "attempts": [],
+    "paymentAttempts": []
   },
   {
     "id": "TXN-0013",
     "customerName": "Priya Patel",
     "amount": 2500,
     "type": "checkout_abandoned",
-    "trueFailureReason": "customer_distraction",
+    "trueFailureReason": "checkout_abandonment",
     "createdAt": "2026-08-19T03:43:00.000Z",
     "status": "pending",
-    "attempts": []
+    "attempts": [],
+    "paymentAttempts": []
   },
   {
     "id": "TXN-0014",
     "customerName": "Sneha Reddy",
     "amount": 3850,
     "type": "checkout_abandoned",
-    "trueFailureReason": "customer_distraction",
+    "trueFailureReason": "checkout_abandonment",
     "createdAt": "2026-08-19T20:05:00.000Z",
     "status": "pending",
-    "attempts": []
+    "attempts": [],
+    "paymentAttempts": []
   },
   {
     "id": "TXN-0015",
     "customerName": "Swati Bansal",
     "amount": 3150,
     "type": "subscription_failed",
-    "trueFailureReason": "international_card_block",
+    "trueFailureReason": "card_failure",
+    "gatewayErrorHint": "Card declined by issuer — reason code 05 (do not honor).",
     "createdAt": "2026-08-20T01:16:00.000Z",
     "status": "pending",
-    "attempts": []
+    "attempts": [],
+    "paymentAttempts": []
   },
   {
     "id": "TXN-0016",
     "customerName": "Manoj Pillai",
     "amount": 8750,
     "type": "invoice_overdue",
-    "trueFailureReason": "invoice_not_reviewed",
+    "trueFailureReason": "overdue_payment",
     "createdAt": "2026-08-21T18:20:00.000Z",
     "status": "pending",
-    "attempts": []
+    "attempts": [],
+    "paymentAttempts": []
   },
   {
     "id": "TXN-0017",
@@ -168,69 +196,80 @@
     "amount": 12300,
     "type": "invoice_overdue",
     "trueFailureReason": "insufficient_funds",
+    "gatewayErrorHint": "Auto-debit failed — issuing bank reported insufficient funds at time of debit.",
     "createdAt": "2026-08-22T09:35:00.000Z",
     "status": "pending",
-    "attempts": []
+    "attempts": [],
+    "paymentAttempts": []
   },
   {
     "id": "TXN-0018",
     "customerName": "Ritu Chawla",
     "amount": 12900,
     "type": "invoice_overdue",
-    "trueFailureReason": "invoice_not_reviewed",
+    "trueFailureReason": "overdue_payment",
     "createdAt": "2026-08-23T02:19:00.000Z",
     "status": "pending",
-    "attempts": []
+    "attempts": [],
+    "paymentAttempts": []
   },
   {
     "id": "TXN-0019",
     "customerName": "Priyanka Nayak",
     "amount": 5150,
     "type": "checkout_abandoned",
-    "trueFailureReason": "customer_distraction",
+    "trueFailureReason": "checkout_abandonment",
     "createdAt": "2026-08-23T19:57:00.000Z",
     "status": "pending",
-    "attempts": []
+    "attempts": [],
+    "paymentAttempts": []
   },
   {
     "id": "TXN-0020",
     "customerName": "Nikhil Agarwal",
     "amount": 7250,
     "type": "payment_failed",
-    "trueFailureReason": "otp_timeout",
+    "trueFailureReason": "authentication_failure",
+    "gatewayErrorHint": "Payment failed — 3-D Secure / OTP authentication was not completed in time.",
     "createdAt": "2026-08-23T23:56:00.000Z",
     "status": "pending",
-    "attempts": []
+    "attempts": [],
+    "paymentAttempts": []
   },
   {
     "id": "TXN-0021",
     "customerName": "Harsh Vora",
     "amount": 12950,
     "type": "invoice_overdue",
-    "trueFailureReason": "invoice_not_reviewed",
+    "trueFailureReason": "overdue_payment",
     "createdAt": "2026-08-24T04:33:00.000Z",
     "status": "pending",
-    "attempts": []
+    "attempts": [],
+    "paymentAttempts": []
   },
   {
     "id": "TXN-0022",
     "customerName": "Rajesh Kumar",
     "amount": 13950,
     "type": "invoice_overdue",
-    "trueFailureReason": "payment_method_declined",
+    "trueFailureReason": "bank_decline",
+    "gatewayErrorHint": "Transaction declined by the issuing bank. No further reason code provided.",
     "createdAt": "2026-08-24T17:53:00.000Z",
     "status": "pending",
-    "attempts": []
+    "attempts": [],
+    "paymentAttempts": []
   },
   {
     "id": "TXN-0023",
     "customerName": "Tanvi Shah",
     "amount": 2950,
     "type": "subscription_failed",
-    "trueFailureReason": "international_card_block",
+    "trueFailureReason": "card_failure",
+    "gatewayErrorHint": "Card declined — issuer reports the card has expired.",
     "createdAt": "2026-08-24T20:43:00.000Z",
     "status": "pending",
-    "attempts": []
+    "attempts": [],
+    "paymentAttempts": []
   },
   {
     "id": "TXN-0024",
@@ -238,29 +277,35 @@
     "amount": 1250,
     "type": "subscription_failed",
     "trueFailureReason": "insufficient_funds",
+    "gatewayErrorHint": "Declined by issuing bank — reason code 51 (insufficient funds).",
     "createdAt": "2026-08-24T22:37:00.000Z",
     "status": "pending",
-    "attempts": []
+    "attempts": [],
+    "paymentAttempts": []
   },
   {
     "id": "TXN-0025",
     "customerName": "Neha Gupta",
     "amount": 11750,
     "type": "payment_failed",
-    "trueFailureReason": "international_card_block",
+    "trueFailureReason": "card_failure",
+    "gatewayErrorHint": "Card declined — issuer reports the card is blocked or restricted.",
     "createdAt": "2026-08-25T07:09:00.000Z",
     "status": "pending",
-    "attempts": []
+    "attempts": [],
+    "paymentAttempts": []
   },
   {
     "id": "TXN-0026",
     "customerName": "Divya Menon",
     "amount": 1750,
     "type": "checkout_abandoned",
-    "trueFailureReason": "otp_timeout",
+    "trueFailureReason": "authentication_failure",
+    "gatewayErrorHint": "Payment failed — 3-D Secure / OTP authentication was not completed in time.",
     "createdAt": "2026-08-25T20:00:00.000Z",
     "status": "pending",
-    "attempts": []
+    "attempts": [],
+    "paymentAttempts": []
   },
   {
     "id": "TXN-0027",
@@ -268,18 +313,21 @@
     "amount": 5850,
     "type": "invoice_overdue",
     "trueFailureReason": "insufficient_funds",
+    "gatewayErrorHint": "Auto-debit failed — issuing bank reported insufficient funds at time of debit.",
     "createdAt": "2026-08-27T19:29:00.000Z",
     "status": "pending",
-    "attempts": []
+    "attempts": [],
+    "paymentAttempts": []
   },
   {
     "id": "TXN-0028",
     "customerName": "Meera Krishnan",
     "amount": 7100,
     "type": "invoice_overdue",
-    "trueFailureReason": "invoice_not_reviewed",
+    "trueFailureReason": "overdue_payment",
     "createdAt": "2026-08-29T06:21:00.000Z",
     "status": "pending",
-    "attempts": []
+    "attempts": [],
+    "paymentAttempts": []
   }
 ]

@@ -25,7 +25,7 @@ export function BarList({ items }: { items: BarListItem[] }) {
               }}
             />
           </div>
-          <span className="w-16 text-right text-sm tabular-nums text-muted-foreground">
+          <span className="whitespace-nowrap text-right text-sm tabular-nums text-muted-foreground">
             {item.valueLabel}
           </span>
         </div>

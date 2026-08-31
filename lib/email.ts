@@ -12,6 +12,7 @@ interface SendConfirmationEmailInput {
   paidUrl: string;
   notPaidUrl: string;
   paidElsewhereUrl: string;
+  needHumanUrl?: string; // omitted when a human is already handling this (e.g. an admin-sent link)
 }
 
 function getBrevoConfig(): { apiKey: string; senderEmail: string } {
@@ -60,12 +61,23 @@ function buildEmailHtml(input: SendConfirmationEmailInput): string {
         </td>
       </tr>
       <tr>
-        <td>
+        <td${input.needHumanUrl ? ' style="padding-bottom: 10px;"' : ""}>
           <a href="${input.paidElsewhereUrl}" style="display: block; text-align: center; background: #F1F5F9; color: #0F172A; text-decoration: none; font-weight: 600; font-size: 14px; padding: 12px; border-radius: 6px; border: 1px solid #E5E7EB;">
             I paid another way (cash / other method)
           </a>
         </td>
       </tr>
+      ${
+        input.needHumanUrl
+          ? `<tr>
+        <td>
+          <a href="${input.needHumanUrl}" style="display: block; text-align: center; background: #ffffff; color: #64748B; text-decoration: none; font-weight: 500; font-size: 13px; padding: 10px; border-radius: 6px; border: 1px dashed #CBD5E1;">
+            None of these — I need to talk to a person
+          </a>
+        </td>
+      </tr>`
+          : ""
+      }
     </table>
   </div>
 </div>`.trim();

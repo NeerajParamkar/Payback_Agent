@@ -6,8 +6,11 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 
 const NAV_LINKS = [
+  { href: "/overview", label: "Overview" },
   { href: "/", label: "Dashboard" },
   { href: "/insights", label: "Insights" },
+  { href: "/customers", label: "Customers" },
+  { href: "/escalations", label: "Escalations" },
 ];
 
 export function SiteHeader() {
@@ -29,20 +32,26 @@ export function SiteHeader() {
           Revenue Recovery Agent
         </span>
         <nav className="ml-auto flex items-center gap-1">
-          {NAV_LINKS.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className={cn(
-                "rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
-                pathname === link.href
-                  ? "bg-white/10 text-navy-foreground"
-                  : "text-navy-foreground/70 hover:text-navy-foreground"
-              )}
-            >
-              {link.label}
-            </Link>
-          ))}
+          {NAV_LINKS.map((link) => {
+            const isActive =
+              link.href === "/"
+                ? pathname === "/"
+                : pathname === link.href || pathname.startsWith(`${link.href}/`);
+            return (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={cn(
+                  "rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
+                  isActive
+                    ? "bg-white/10 text-navy-foreground"
+                    : "text-navy-foreground/70 hover:text-navy-foreground"
+                )}
+              >
+                {link.label}
+              </Link>
+            );
+          })}
         </nav>
       </div>
     </header>

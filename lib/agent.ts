@@ -1,41 +1,58 @@
 import { randomUUID } from "crypto";
-import { diagnoseTransaction } from "@/lib/diagnose";
+import { releaseLock, tryAcquireLock } from "@/lib/agent-lock";
+import { diagnoseTransaction, type CustomerHistoryContext } from "@/lib/diagnose";
 import { sendConfirmationEmail } from "@/lib/email";
-import { isWellMatched } from "@/lib/match-quality";
+import {
+  isWellMatched,
+  MISMATCHED_SUCCESS_RATE,
+  WELL_MATCHED_SUCCESS_RATE,
+} from "@/lib/match-quality";
+import { getOrderPaymentStatus, resolvePaymentAttempt } from "@/lib/payment-attempts";
 import { createRecoveryPaymentLink } from "@/lib/razorpay";
+import {
+  decideRecoveryAction,
+  resolveSimulationAction,
+  type ManualEscalationFlags,
+  type RecoveryDecisionInput,
+  type RecoveryDecisionResult,
+} from "@/lib/recovery-decision-engine";
+import { syncRecoveryCaseFor } from "@/lib/recovery-case-store";
+import { syncEscalationEntryFor } from "@/lib/escalation-queue-store";
+import { syncPromiseToPayFor } from "@/lib/promise-to-pay-store";
+import { getRecoveryWorkflowConfig } from "@/lib/recovery-workflow-config";
 import { readTransactions, writeTransactions } from "@/lib/transactions-store";
 import type {
   AttemptOutcome,
-  FailureReason,
+  PaymentAttempt,
   RecoveryAction,
   RecoveryAttempt,
+  RootCause,
   Transaction,
   TransactionStatus,
 } from "@/lib/types";
 
-const MAX_ATTEMPTS = 3;
-
-const WELL_MATCHED_SUCCESS_RATE = 0.7;
-const MISMATCHED_SUCCESS_RATE = 0.3;
-
-// How long to wait before the next attempt, per diagnosed reason. Reasons that are
-// inherently time-boxed (an OTP expiring, a transient bank glitch) get retried right
-// away; reasons that need real-world time to resolve (funds arriving, a customer
-// updating their card, a corporate approval workflow) get a real cool-down instead
-// of being hammered again immediately.
-const RETRY_DELAY_HOURS: Record<FailureReason, number> = {
-  otp_timeout: 0,
-  bank_server_error: 0,
-  customer_distraction: 6,
-  payment_method_declined: 12,
-  card_expired: 24,
-  international_card_block: 24,
+// How long to wait before the next attempt, per diagnosed root cause. Causes that
+// are inherently time-boxed (an OTP expiring, a transient network glitch) get
+// retried right away; causes that need real-world time to resolve (funds arriving,
+// a customer updating their card, a corporate approval workflow) get a real
+// cool-down instead of being hammered again immediately.
+const RETRY_DELAY_HOURS: Record<RootCause, number> = {
+  network_failure: 0,
+  authentication_failure: 0,
+  upi_failure: 0,
+  payment_pending: 1,
+  checkout_abandonment: 6,
+  bank_decline: 12,
+  card_failure: 24,
+  repeated_payment_failure: 24,
+  payment_order_mismatch: 24,
+  unknown: 24,
   insufficient_funds: 48,
-  invoice_not_reviewed: 72,
+  overdue_payment: 72,
 };
 
 function simulateOutcome(
-  trueReason: FailureReason,
+  trueReason: RootCause,
   action: RecoveryAction
 ): AttemptOutcome {
   const paidProbability = isWellMatched(trueReason, action)
@@ -57,26 +74,21 @@ interface ExecuteResult {
   paymentLinkUrl?: string;
 }
 
-const SIMULATED_ACTION_LABELS: Partial<Record<RecoveryAction, string>> = {
-  send_sms_reminder: "sent_sms_reminder",
-  send_whatsapp_reminder: "sent_whatsapp_reminder",
-  send_email_reminder: "sent_email_reminder",
-  offer_incentive_discount: "sent_incentive_offer",
-  escalate_to_call: "escalated_to_call",
-  escalate_to_account_manager: "escalated_to_account_manager",
-};
-
+/**
+ * Executes exactly one validated decision (lib/recovery-decision-engine.ts) -
+ * never the AI's raw recommendation. "generate_payment_link" is the only branch
+ * that performs a real financial operation (a genuine Razorpay Payment Link);
+ * everything else is either a logged/simulated message or a no-op label.
+ */
 async function executeAction(
   transaction: Transaction,
-  diagnosedReason: FailureReason,
-  recommendedAction: RecoveryAction,
+  diagnosedReason: RootCause,
+  decision: RecoveryDecisionResult,
   customerMessage: string,
-  attemptNumber: number
+  attemptNumber: number,
+  priorAttempts: RecoveryAttempt[]
 ): Promise<ExecuteResult> {
-  if (
-    recommendedAction === "retry_payment_same_method" ||
-    recommendedAction === "retry_payment_alternate_method"
-  ) {
+  if (decision.action === "generate_payment_link") {
     const link = await createRecoveryPaymentLink({
       transactionId: transaction.id,
       amount: transaction.amount,
@@ -86,57 +98,94 @@ async function executeAction(
       customerEmail: transaction.customerEmail,
       customerPhone: transaction.customerPhone,
     });
-    const methodLabel =
-      recommendedAction === "retry_payment_alternate_method"
-        ? "alternate"
-        : "same";
+    const methodLabel = decision.methodHint === "alternate" ? "alternate" : "same";
     return {
-      actionTaken: "razorpay_retry",
+      actionTaken: "generated_payment_link",
       actionDetail: `We're re-attempting your payment of ₹${transaction.amount} (${methodLabel} method). Complete it securely here: ${link.paymentLinkUrl}`,
       paymentLinkId: link.paymentLinkId,
       paymentLinkUrl: link.paymentLinkUrl,
     };
   }
 
-  if (recommendedAction === "mark_unrecoverable") {
-    return {
-      actionTaken: "mark_unrecoverable",
-      actionDetail:
-        "Diagnosis judged this transaction unrecoverable; no further recovery action attempted.",
-    };
+  if (decision.action === "retry") {
+    // Resend the existing, still-unresolved Payment Link - no new Razorpay call.
+    const existing = [...priorAttempts].reverse().find((a) => a.paymentLinkUrl);
+    if (existing?.paymentLinkUrl) {
+      return {
+        actionTaken: "resent_payment_link",
+        actionDetail: `Just a reminder — you can still complete your payment of ₹${transaction.amount} here: ${existing.paymentLinkUrl}`,
+        paymentLinkId: existing.paymentLinkId,
+        paymentLinkUrl: existing.paymentLinkUrl,
+      };
+    }
+    // Defensive fallback - the policy engine only chooses "retry" when an active
+    // link exists, but if one truly can't be found, degrade to a plain reminder
+    // rather than fail the attempt.
+    return { actionTaken: "sent_reminder", actionDetail: customerMessage };
   }
 
-  // Simulated message actions - logged only, nothing actually sent.
-  return {
-    actionTaken: SIMULATED_ACTION_LABELS[recommendedAction] ?? recommendedAction,
-    actionDetail: customerMessage,
-  };
+  if (decision.action === "send_email") {
+    return { actionTaken: "sent_email_reminder", actionDetail: customerMessage };
+  }
+
+  // "send_reminder" and any other fallthrough - simulated message only.
+  // ("escalate_to_human"/"stop"/"wait"/"track_promise_to_pay" never reach this
+  // function - lib/agent.ts short-circuits all four before calling executeAction.)
+  return { actionTaken: "sent_reminder", actionDetail: customerMessage };
 }
 
 export interface AgentRunResult {
   transaction: Transaction;
   error?: string;
+  // True when this call never actually ran: another in-flight call already
+  // holds the per-order lock for this transaction. `transaction` is simply the
+  // input echoed back, unmodified - callers that persist results in bulk (see
+  // run-batch/route.ts) must not blindly overwrite the record with this stale
+  // copy, since the concurrent holder may have since written real changes to it.
+  locked?: boolean;
 }
 
 /**
- * Runs the recovery loop for a single transaction: diagnose -> execute -> simulate
- * outcome -> escalate or stop, up to MAX_ATTEMPTS. Hard stopping rules (max attempts,
- * freeze after mark_unrecoverable) are enforced here, not left to the LLM.
+ * Runs the bounded recovery workflow for a single transaction: re-check payment
+ * status -> diagnose -> decide (Recovery Decision Engine) -> execute at most ONE
+ * action -> always pause before the next one, up to config.maxTotalAttempts.
+ * Hard stopping rules (max attempts, freeze after a policy-decided stop) are
+ * enforced here, not left to the LLM.
  *
- * Between attempts, a per-diagnosed-reason cool-down applies (RETRY_DELAY_HOURS) -
- * reasons with a 0-hour delay (e.g. otp_timeout) still escalate immediately within
- * this same call, but a reason that needs real time to resolve (e.g. insufficient_funds)
- * pauses here: the transaction is returned as "in_progress" with nextEligibleAttemptDate
- * set, and its next attempt only happens on a later run once that date has passed.
+ * Every action - a Payment Link, a reminder, an escalation - is followed by a
+ * mandatory cool-down (RETRY_DELAY_HOURS for the diagnosed cause, floored by
+ * config.delayBetweenActionsHours and, for reminders, config.reminderCooldownHours)
+ * before the next one is even considered; this function never fires two actions
+ * back-to-back in the same call, matching the workflow's own configured pace.
+ *
+ * Wrapped by the exported runAgentForTransaction with a per-order lock (see
+ * lib/agent-lock.ts) so two overlapping calls can never process the same order
+ * at once - the concrete guarantee against duplicate reminders or Payment Links.
  */
-export async function runAgentForTransaction(
-  transaction: Transaction
+async function runAgentForTransactionLocked(
+  transaction: Transaction,
+  customerHistory?: CustomerHistoryContext
 ): Promise<AgentRunResult> {
-  // Frozen: already resolved by a previous run, or attempts already exhausted.
+  const config = getRecoveryWorkflowConfig();
+
+  // The order's payment-attempt history is the ground truth for whether money
+  // has actually been captured - checked first, ahead of every status-based
+  // guard below, so a captured payment attempt always wins even if `status`
+  // hasn't caught up to it yet. Re-checked again per-cycle below (and inside
+  // the Decision Engine itself) so a payment captured moments ago is never missed.
+  if (getOrderPaymentStatus(transaction) === "paid") {
+    return { transaction };
+  }
+
+  // Frozen: already resolved by a previous run, attempts already exhausted, or
+  // escalated to a human - see lib/escalation-queue.ts. Once escalated, this
+  // order is permanently off-limits to automation; only an admin action
+  // (lib/escalation-queue.ts's resolve/stop/mark-recovered/etc.) moves it again.
   if (
     transaction.status === "recovered" ||
     transaction.status === "unrecovered" ||
-    transaction.attempts.length >= MAX_ATTEMPTS
+    transaction.status === "escalated" ||
+    transaction.attempts.length >= config.maxTotalAttempts
   ) {
     return { transaction };
   }
@@ -162,16 +211,27 @@ export async function runAgentForTransaction(
   }
 
   const attempts: RecoveryAttempt[] = [...transaction.attempts];
+  let paymentAttempts: PaymentAttempt[] = [...transaction.paymentAttempts];
   let finalStatus: TransactionStatus | null = null;
   let nextEligibleAttemptDate: string | undefined;
   let pendingResponseToken: string | undefined;
 
   for (
     let attemptNumber = attempts.length + 1;
-    attemptNumber <= MAX_ATTEMPTS;
+    attemptNumber <= config.maxTotalAttempts;
     attemptNumber++
   ) {
     try {
+      // A REAL Razorpay-reported failure on THIS order's own most recent
+      // payment attempt (razorpayPaymentId set - distinguishes genuine
+      // gateway data from our own simulated failureReason, which is just our
+      // prior diagnosis echoed back, not new evidence) - fed into diagnosis
+      // as live signal on a retry, integrating the real webhook data instead
+      // of re-guessing blind every cycle.
+      const latestGatewayFailureReason = [...paymentAttempts]
+        .reverse()
+        .find((p) => p.status === "failed" && p.razorpayPaymentId && p.failureReason)?.failureReason;
+
       const diagnosis = await diagnoseTransaction({
         id: transaction.id,
         type: transaction.type,
@@ -179,34 +239,160 @@ export async function runAgentForTransaction(
         customerName: transaction.customerName,
         attemptNumber,
         previousActions: attempts.map((a) => a.recommendedAction as RecoveryAction),
+        customerHistory,
+        gatewayErrorHint: transaction.gatewayErrorHint,
+        latestGatewayFailureReason,
       });
 
-      const execResult = await executeAction(
-        transaction,
-        diagnosis.reason,
-        diagnosis.recommendedAction,
-        diagnosis.customerMessage,
-        attemptNumber
-      );
+      // The AI only ever RECOMMENDS (diagnosis.recommendedAction, above) - it is
+      // never allowed to directly trigger a financial or communication operation.
+      // The deterministic Recovery Decision Engine validates that recommendation
+      // against hard business rules (including this workflow's configured caps)
+      // and returns what actually happens.
+      const decisionInput: RecoveryDecisionInput = {
+        aiRecommendedAction: diagnosis.recommendedAction,
+        confidence: diagnosis.confidence,
+        recoveryProbability: diagnosis.recoveryProbability,
+        amount: transaction.amount,
+        recoveryScore: Math.round(diagnosis.recoveryProbability * 100),
+        attemptCount: attempts.length,
+        // Hours since recovery actually started (first attempt), not since the
+        // order's original creation date - the latter can be arbitrarily old in
+        // seed/demo data without automation having been "stuck" on it at all.
+        recoveryDurationHours:
+          (Date.now() - new Date(attempts[0]?.timestamp ?? transaction.createdAt).getTime()) /
+          3600_000,
+        remindersSent: attempts.filter(
+          (a) => a.decisionAction === "send_reminder" || a.decisionAction === "send_email"
+        ).length,
+        paymentRetriesUsed: attempts.filter((a) => a.decisionAction === "generate_payment_link")
+          .length,
+        isOrderPaid:
+          getOrderPaymentStatus({ ...transaction, paymentAttempts }) === "paid",
+        hasActivePaymentLink: paymentAttempts.some(
+          (p) => p.status === "created" || p.status === "pending"
+        ),
+        customerOptedOut: transaction.customerOptedOut ?? false,
+        manualFlags: {
+          customerDisputed: transaction.customerDisputed ?? false,
+          customerClaimsPaidUnverified: transaction.customerClaimsPaidUnverified ?? false,
+          suspectedFraud: transaction.suspectedFraud ?? false,
+          complexIssueFlag: transaction.complexIssueFlag ?? false,
+        } satisfies ManualEscalationFlags,
+        previousActions: attempts.map((a) => a.recommendedAction as RecoveryAction),
+        previousResponses: attempts.map((a) => a.outcome),
+        customerHistory,
+        config,
+      };
+      const decision = decideRecoveryAction(decisionInput);
 
-      if (diagnosis.recommendedAction === "mark_unrecoverable") {
+      const analysisFields = {
+        confidence: diagnosis.confidence,
+        recoveryProbability: diagnosis.recoveryProbability,
+        priority: diagnosis.priority,
+        diagnosisRationale: diagnosis.reason,
+        decisionAction: decision.action,
+        policyOverridden: decision.overridden,
+        policyReason: decision.reason,
+        ...(decision.escalationReasons.length > 0
+          ? { escalationReasons: decision.escalationReasons }
+          : {}),
+      };
+
+      // "Wait" and "track a promise-to-pay" perform no operation at all - no
+      // message sent, no Razorpay call, nothing simulated. Just note the
+      // decision and check back later.
+      if (decision.action === "wait" || decision.action === "track_promise_to_pay") {
+        const baseWaitHours = decision.action === "track_promise_to_pay" ? 72 : 12;
+        const delayHours = Math.max(baseWaitHours, config.delayBetweenActionsHours);
+        const scheduledFor = new Date(Date.now() + delayHours * 3600_000).toISOString();
         attempts.push({
           attemptNumber,
           timestamp: new Date().toISOString(),
-          diagnosedReason: diagnosis.reason,
+          diagnosedReason: diagnosis.rootCause,
           recommendedAction: diagnosis.recommendedAction,
-          actionTaken: execResult.actionTaken,
-          actionDetail: execResult.actionDetail,
+          actionTaken: decision.action,
+          actionDetail: decision.reason,
+          outcome: "deferred",
+          ...analysisFields,
+          nextAttemptEligibleAt: scheduledFor,
+        });
+        nextEligibleAttemptDate = scheduledFor;
+        // A tracked promise gets its own distinct status (see lib/promise-to-pay.ts) -
+        // "wait" stays the generic "in_progress" cooldown.
+        if (decision.action === "track_promise_to_pay") {
+          finalStatus = "promise_to_pay";
+        }
+        break;
+      }
+
+      // The policy engine decided to give up - no execution, no simulation.
+      if (decision.action === "stop") {
+        attempts.push({
+          attemptNumber,
+          timestamp: new Date().toISOString(),
+          diagnosedReason: diagnosis.rootCause,
+          recommendedAction: diagnosis.recommendedAction,
+          actionTaken: "stopped_by_policy",
+          actionDetail: decision.reason,
           outcome: "no_response",
+          ...analysisFields,
         });
         finalStatus = "unrecovered";
         break;
       }
 
+      // Escalated to a human (lib/escalation-queue.ts) - this order is frozen
+      // for automation from this point on, permanently, regardless of attempts
+      // remaining. No message is sent, no Payment Link is minted, and the
+      // outcome is never simulated - only an admin action moves this order again.
+      if (decision.action === "escalate_to_human") {
+        attempts.push({
+          attemptNumber,
+          timestamp: new Date().toISOString(),
+          diagnosedReason: diagnosis.rootCause,
+          recommendedAction: diagnosis.recommendedAction,
+          actionTaken: "escalated_to_human",
+          actionDetail: decision.reason,
+          outcome: "no_response",
+          ...analysisFields,
+        });
+        finalStatus = "escalated";
+        break;
+      }
+
+      const execResult = await executeAction(
+        transaction,
+        diagnosis.rootCause,
+        decision,
+        diagnosis.customerMessage,
+        attemptNumber,
+        attempts
+      );
+
+      // Only "generate_payment_link" mints a genuinely NEW Payment Link - record
+      // it as "created" immediately, before we even know the outcome, so it's
+      // never lost if something below throws (e.g. the confirmation email fails
+      // to send). "retry" reuses an existing link and must not double-record it.
+      if (decision.action === "generate_payment_link" && execResult.paymentLinkId) {
+        paymentAttempts = [
+          ...paymentAttempts,
+          {
+            id: randomUUID(),
+            recoveryAttemptNumber: attemptNumber,
+            status: "created",
+            amount: transaction.amount,
+            paymentLinkId: execResult.paymentLinkId,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          },
+        ];
+      }
+
       // Real customer - send a real email instead of simulating an outcome.
       // The transaction freezes here until they click a response link. For
-      // retry actions, execResult.actionDetail already contains the real
-      // payment link, so it's included in the email body automatically -
+      // generate_payment_link/retry, execResult.actionDetail already contains
+      // the real payment link, so it's included in the email body automatically -
       // for every other action it's identical to diagnosis.customerMessage.
       if (transaction.customerEmail) {
         const token = randomUUID();
@@ -220,16 +406,18 @@ export async function runAgentForTransaction(
           paidUrl: `${baseUrl}/confirm?t=${transaction.id}&r=paid&token=${token}`,
           notPaidUrl: `${baseUrl}/confirm?t=${transaction.id}&r=not_paid&token=${token}`,
           paidElsewhereUrl: `${baseUrl}/confirm?t=${transaction.id}&r=paid_elsewhere&token=${token}`,
+          needHumanUrl: `${baseUrl}/confirm?t=${transaction.id}&r=need_human&token=${token}`,
         });
 
         attempts.push({
           attemptNumber,
           timestamp: new Date().toISOString(),
-          diagnosedReason: diagnosis.reason,
+          diagnosedReason: diagnosis.rootCause,
           recommendedAction: diagnosis.recommendedAction,
           actionTaken: execResult.actionTaken,
           actionDetail: `${execResult.actionDetail} (real email sent to ${transaction.customerEmail})`,
           outcome: "awaiting_response",
+          ...analysisFields,
           ...(execResult.paymentLinkId
             ? { paymentLinkId: execResult.paymentLinkId }
             : {}),
@@ -242,9 +430,28 @@ export async function runAgentForTransaction(
         break; // stop entirely; only a real click on a response link continues this
       }
 
+      // The simulation reflects what was ACTUALLY executed (the validated
+      // decision), never the AI's raw suggestion if the policy engine changed it.
       const outcome = simulateOutcome(
         transaction.trueFailureReason,
-        diagnosis.recommendedAction
+        resolveSimulationAction(decision, customerHistory)
+      );
+
+      // Resolve this cycle's payment attempt into its terminal state. A "retry"
+      // (resend) updates the ORIGINAL Payment Link's entry, not a new one -
+      // found by matching its paymentLinkId back to the recoveryAttemptNumber
+      // that created it.
+      const paymentAttemptNumberToResolve =
+        decision.action === "retry"
+          ? (paymentAttempts.find((p) => p.paymentLinkId === execResult.paymentLinkId)
+              ?.recoveryAttemptNumber ?? attemptNumber)
+          : attemptNumber;
+      paymentAttempts = resolvePaymentAttempt(
+        paymentAttempts,
+        paymentAttemptNumberToResolve,
+        transaction.amount,
+        outcome,
+        diagnosis.rootCause
       );
 
       const paymentLinkFields = {
@@ -260,58 +467,63 @@ export async function runAgentForTransaction(
         attempts.push({
           attemptNumber,
           timestamp: new Date().toISOString(),
-          diagnosedReason: diagnosis.reason,
+          diagnosedReason: diagnosis.rootCause,
           recommendedAction: diagnosis.recommendedAction,
           actionTaken: execResult.actionTaken,
           actionDetail: execResult.actionDetail,
           outcome,
+          ...analysisFields,
           ...paymentLinkFields,
         });
         finalStatus = "recovered";
         break;
       }
 
-      if (attemptNumber === MAX_ATTEMPTS) {
+      if (attemptNumber === config.maxTotalAttempts) {
         attempts.push({
           attemptNumber,
           timestamp: new Date().toISOString(),
-          diagnosedReason: diagnosis.reason,
+          diagnosedReason: diagnosis.rootCause,
           recommendedAction: diagnosis.recommendedAction,
           actionTaken: execResult.actionTaken,
           actionDetail: execResult.actionDetail,
           outcome,
+          ...analysisFields,
           ...paymentLinkFields,
         });
         finalStatus = "unrecovered";
         break;
       }
 
-      // Not resolved, attempts remain - decide whether to escalate right now
-      // (0-hour reasons) or wait out this reason's real-world cool-down.
-      const delayHours =
-        RETRY_DELAY_HOURS[diagnosis.reason as FailureReason] ?? 0;
-      const scheduledFor =
-        delayHours > 0
-          ? new Date(Date.now() + delayHours * 3600_000).toISOString()
-          : undefined;
+      // Not resolved, attempts remain - always pause before the next one. The
+      // workflow never fires two actions back-to-back in the same run: every
+      // action gets at least config.delayBetweenActionsHours (and, for a
+      // reminder-type action, at least config.reminderCooldownHours too),
+      // floored further up by the diagnosed cause's own real-world cool-down.
+      const isReminderAction = decision.action === "send_reminder" || decision.action === "send_email";
+      const causeDelayHours = RETRY_DELAY_HOURS[diagnosis.rootCause] ?? 0;
+      const delayHours = Math.max(
+        causeDelayHours,
+        config.delayBetweenActionsHours,
+        isReminderAction ? config.reminderCooldownHours : 0
+      );
+      const scheduledFor = new Date(Date.now() + delayHours * 3600_000).toISOString();
 
       attempts.push({
         attemptNumber,
         timestamp: new Date().toISOString(),
-        diagnosedReason: diagnosis.reason,
+        diagnosedReason: diagnosis.rootCause,
         recommendedAction: diagnosis.recommendedAction,
         actionTaken: execResult.actionTaken,
         actionDetail: execResult.actionDetail,
         outcome,
+        ...analysisFields,
         ...paymentLinkFields,
-        ...(scheduledFor ? { nextAttemptEligibleAt: scheduledFor } : {}),
+        nextAttemptEligibleAt: scheduledFor,
       });
 
-      if (scheduledFor) {
-        nextEligibleAttemptDate = scheduledFor;
-        break; // pause here; the next attempt resumes on a future run once eligible
-      }
-      // else: 0-hour reason, loop continues to the next attempt immediately.
+      nextEligibleAttemptDate = scheduledFor;
+      break; // always pause here; the next attempt resumes on a future run once eligible
     } catch (error) {
       const message =
         error instanceof Error
@@ -322,6 +534,7 @@ export async function runAgentForTransaction(
           ...transaction,
           status: attempts.length > 0 ? "in_progress" : transaction.status,
           attempts,
+          paymentAttempts,
           nextEligibleAttemptDate: undefined,
         },
         error: `Attempt ${attemptNumber} failed: ${message}`,
@@ -334,11 +547,38 @@ export async function runAgentForTransaction(
       ...transaction,
       status: finalStatus ?? "in_progress",
       attempts,
-      nextEligibleAttemptDate: finalStatus ? undefined : nextEligibleAttemptDate,
+      paymentAttempts,
+      // Scheduled resumption survives for the two non-terminal end states
+      // (plain in_progress cooldown, and a tracked promise's deadline) -
+      // wiped for every terminal one (recovered/unrecovered/escalated) and
+      // for waiting_for_response, which resumes on a customer's click, not a date.
+      nextEligibleAttemptDate:
+        !finalStatus || finalStatus === "promise_to_pay" ? nextEligibleAttemptDate : undefined,
       pendingResponseToken:
         finalStatus === "waiting_for_response" ? pendingResponseToken : undefined,
     },
   };
+}
+
+/**
+ * Public entry point - acquires a per-order lock before running the workflow
+ * and always releases it afterward, so two overlapping calls (e.g. a
+ * double-clicked "Run Batch") can never process the same order at once. If the
+ * order is already being processed, this is a safe no-op: it returns the
+ * transaction unchanged rather than racing the in-flight run.
+ */
+export async function runAgentForTransaction(
+  transaction: Transaction,
+  customerHistory?: CustomerHistoryContext
+): Promise<AgentRunResult> {
+  if (!tryAcquireLock(transaction.id)) {
+    return { transaction, locked: true };
+  }
+  try {
+    return await runAgentForTransactionLocked(transaction, customerHistory);
+  } finally {
+    releaseLock(transaction.id);
+  }
 }
 
 export interface EmailResponseResult {
@@ -348,16 +588,40 @@ export interface EmailResponseResult {
 }
 
 /**
+ * Public entry point - acquires the same per-order lock runAgentForTransaction
+ * uses, so a real customer's click can never race an in-flight automated run
+ * for the same order.
+ */
+export async function handleEmailResponse(
+  transactionId: string,
+  token: string,
+  response: "paid" | "not_paid" | "paid_elsewhere" | "need_human"
+): Promise<EmailResponseResult> {
+  if (!tryAcquireLock(transactionId)) {
+    return {
+      ok: false,
+      message: "This transaction is currently being processed; please try again in a moment.",
+    };
+  }
+  try {
+    return await handleEmailResponseLocked(transactionId, token, response);
+  } finally {
+    releaseLock(transactionId);
+  }
+}
+
+/**
  * Handles a customer clicking a response link in a real recovery email.
  * Updates the pending attempt with the real outcome, then applies the same
  * hard stopping rules as the automated loop (max attempts, freeze on terminal
  * outcomes) rather than a separate set of rules.
  */
-export async function handleEmailResponse(
+async function handleEmailResponseLocked(
   transactionId: string,
   token: string,
-  response: "paid" | "not_paid" | "paid_elsewhere"
+  response: "paid" | "not_paid" | "paid_elsewhere" | "need_human"
 ): Promise<EmailResponseResult> {
+  const config = getRecoveryWorkflowConfig();
   const transactions = await readTransactions();
   const index = transactions.findIndex((t) => t.id === transactionId);
   if (index === -1) {
@@ -384,6 +648,26 @@ export async function handleEmailResponse(
   }
 
   const respondedAt = new Date().toISOString();
+  const outcome: AttemptOutcome =
+    response === "paid"
+      ? "paid"
+      : response === "paid_elsewhere"
+        ? "paid_elsewhere"
+        : "declined_again";
+  // Resolves the "created" payment attempt this email's retry link produced
+  // (or appends one, for a non-retry action) into its real, human-confirmed
+  // terminal state - same helper the automated loop uses. A "need_human" click
+  // isn't a payment outcome, so the pending attempt is left exactly as it was.
+  const paymentAttempts =
+    response === "need_human"
+      ? transaction.paymentAttempts
+      : resolvePaymentAttempt(
+          transaction.paymentAttempts,
+          lastAttempt.attemptNumber,
+          transaction.amount,
+          outcome,
+          lastAttempt.diagnosedReason
+        );
   let updated: Transaction;
 
   if (response === "paid") {
@@ -392,6 +676,7 @@ export async function handleEmailResponse(
       ...transaction,
       status: "recovered",
       attempts,
+      paymentAttempts,
       pendingResponseToken: undefined,
       nextEligibleAttemptDate: undefined,
     };
@@ -401,31 +686,58 @@ export async function handleEmailResponse(
       ...transaction,
       status: "unrecovered",
       attempts,
+      paymentAttempts,
+      pendingResponseToken: undefined,
+      nextEligibleAttemptDate: undefined,
+    };
+  } else if (response === "need_human") {
+    // Customer explicitly asked for a person - escalate immediately, same
+    // freeze as an automated escalation (lib/escalation-queue.ts).
+    attempts[lastIndex] = {
+      ...lastAttempt,
+      outcome: "declined_again",
+      respondedAt,
+      escalationReasons: ["customer_requested_human"],
+    };
+    updated = {
+      ...transaction,
+      status: "escalated",
+      attempts,
+      paymentAttempts,
       pendingResponseToken: undefined,
       nextEligibleAttemptDate: undefined,
     };
   } else {
     attempts[lastIndex] = { ...lastAttempt, outcome: "declined_again", respondedAt };
-    if (lastAttempt.attemptNumber >= MAX_ATTEMPTS) {
+    if (lastAttempt.attemptNumber >= config.maxTotalAttempts) {
+      // Max attempts reached, discovered via a real customer's final response -
+      // escalate, same as the automated loop's own retry-limit rule.
+      attempts[lastIndex] = {
+        ...attempts[lastIndex],
+        escalationReasons: ["max_attempts_reached"],
+      };
       updated = {
         ...transaction,
-        status: "unrecovered",
+        status: "escalated",
         attempts,
+        paymentAttempts,
         pendingResponseToken: undefined,
         nextEligibleAttemptDate: undefined,
       };
     } else {
-      // At least a 1-hour gap before the next real email, even for reasons that
-      // are "immediate" in the simulated flow - don't re-email a real person
-      // seconds after they just said no.
+      // At least the configured minimum gap before the next real email, even
+      // for reasons that are "immediate" in the simulated flow - don't re-email
+      // a real person seconds after they just said no.
       const delayHours = Math.max(
-        RETRY_DELAY_HOURS[lastAttempt.diagnosedReason as FailureReason] ?? 0,
-        1
+        RETRY_DELAY_HOURS[lastAttempt.diagnosedReason as RootCause] ?? 0,
+        config.delayBetweenActionsHours,
+        config.reminderCooldownHours
       );
       updated = {
         ...transaction,
         status: "in_progress",
         attempts,
+        paymentAttempts,
         pendingResponseToken: undefined,
         nextEligibleAttemptDate: new Date(
           Date.now() + delayHours * 3600_000
@@ -436,100 +748,9 @@ export async function handleEmailResponse(
 
   transactions[index] = updated;
   await writeTransactions(transactions);
+  await syncRecoveryCaseFor(updated);
+  await syncEscalationEntryFor(updated);
+  await syncPromiseToPayFor(updated);
 
   return { ok: true, message: "Thanks — your response has been recorded.", transaction: updated };
-}
-
-interface RazorpayWebhookNotes {
-  original_transaction_id?: unknown;
-  attempt_number?: unknown;
-}
-
-interface RazorpayWebhookEvent {
-  event?: unknown;
-  payload?: {
-    payment_link?: { entity?: { id?: unknown; notes?: RazorpayWebhookNotes } };
-    payment?: { entity?: { id?: unknown; notes?: RazorpayWebhookNotes } };
-  };
-}
-
-export interface WebhookHandleResult {
-  handled: boolean;
-  reason: string;
-}
-
-/**
- * Handles a verified Razorpay webhook event (payment_link.paid / payment.captured).
- * Only ever resolves attempts created via createRecoveryPaymentLink (outcome
- * "awaiting_payment") - every other action type is untouched by this path,
- * matching the plan: real webhook outcomes replace the simulation only for
- * payment-link retries, not for reminder-type actions.
- */
-export async function handlePaymentWebhookEvent(
-  rawEvent: unknown
-): Promise<WebhookHandleResult> {
-  const event = rawEvent as RazorpayWebhookEvent;
-  const entity = event.payload?.payment_link?.entity ?? event.payload?.payment?.entity;
-  const notes = entity?.notes;
-  const transactionId =
-    typeof notes?.original_transaction_id === "string"
-      ? notes.original_transaction_id
-      : undefined;
-
-  if (!transactionId) {
-    return { handled: false, reason: "No original_transaction_id in webhook notes; ignored." };
-  }
-
-  const paymentLinkId =
-    typeof event.payload?.payment_link?.entity?.id === "string"
-      ? event.payload.payment_link.entity.id
-      : undefined;
-  const attemptNumberFromNotes =
-    typeof notes?.attempt_number === "number"
-      ? notes.attempt_number
-      : typeof notes?.attempt_number === "string"
-        ? Number(notes.attempt_number)
-        : undefined;
-
-  const transactions = await readTransactions();
-  const index = transactions.findIndex((t) => t.id === transactionId);
-  if (index === -1) {
-    return { handled: false, reason: `Transaction ${transactionId} not found; ignored.` };
-  }
-
-  const transaction = transactions[index];
-
-  // Already resolved (e.g. a redelivered webhook) - idempotent no-op.
-  if (transaction.status === "recovered" || transaction.status === "unrecovered") {
-    return { handled: false, reason: `Transaction ${transactionId} already resolved; ignored.` };
-  }
-
-  const attempts = [...transaction.attempts];
-  const attemptIndex = attempts.findIndex((a) =>
-    paymentLinkId ? a.paymentLinkId === paymentLinkId : a.attemptNumber === attemptNumberFromNotes
-  );
-
-  if (attemptIndex === -1 || attempts[attemptIndex].outcome !== "awaiting_payment") {
-    return {
-      handled: false,
-      reason: `No matching awaiting_payment attempt found for ${transactionId}; ignored.`,
-    };
-  }
-
-  attempts[attemptIndex] = {
-    ...attempts[attemptIndex],
-    outcome: "paid",
-    respondedAt: new Date().toISOString(),
-  };
-
-  transactions[index] = {
-    ...transaction,
-    status: "recovered",
-    attempts,
-    nextEligibleAttemptDate: undefined,
-  };
-
-  await writeTransactions(transactions);
-
-  return { handled: true, reason: `Transaction ${transactionId} marked recovered via webhook.` };
 }

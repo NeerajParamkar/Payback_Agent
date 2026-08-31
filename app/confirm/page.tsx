@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { CheckCircle2, XCircle } from "lucide-react";
+import { CheckCircle2, UserRound, XCircle } from "lucide-react";
 import { handleEmailResponse } from "@/lib/agent";
 import { formatINR } from "@/lib/format";
 
@@ -7,7 +7,7 @@ interface ConfirmPageProps {
   searchParams: Promise<{ t?: string; r?: string; token?: string }>;
 }
 
-const VALID_RESPONSES = ["paid", "not_paid", "paid_elsewhere"] as const;
+const VALID_RESPONSES = ["paid", "not_paid", "paid_elsewhere", "need_human"] as const;
 type ValidResponse = (typeof VALID_RESPONSES)[number];
 
 function isValidResponse(value: string | undefined): value is ValidResponse {
@@ -17,16 +17,20 @@ function isValidResponse(value: string | undefined): value is ValidResponse {
 export default async function ConfirmPage({ searchParams }: ConfirmPageProps) {
   const { t: transactionId, r: response, token } = await searchParams;
 
-  let result: { ok: boolean; message: string; amount?: number } | null = null;
+  let result: { ok: boolean; message: string; amount?: number; needHuman?: boolean } | null = null;
 
   if (!transactionId || !token || !isValidResponse(response)) {
     result = { ok: false, message: "This link is missing required information." };
   } else {
     const outcome = await handleEmailResponse(transactionId, token, response);
+    const needHuman = outcome.ok && response === "need_human";
     result = {
       ok: outcome.ok,
-      message: outcome.message,
+      message: needHuman
+        ? "Thanks — a team member will reach out to you shortly."
+        : outcome.message,
       amount: outcome.transaction?.amount,
+      needHuman,
     };
   }
 
@@ -39,10 +43,12 @@ export default async function ConfirmPage({ searchParams }: ConfirmPageProps) {
           </div>
         </div>
 
-        {result.ok ? (
-          <CheckCircle2 className="mx-auto mb-3 size-10 text-success" />
-        ) : (
+        {!result.ok ? (
           <XCircle className="mx-auto mb-3 size-10 text-destructive" />
+        ) : result.needHuman ? (
+          <UserRound className="mx-auto mb-3 size-10 text-brand-blue" />
+        ) : (
+          <CheckCircle2 className="mx-auto mb-3 size-10 text-success" />
         )}
 
         <p className="text-sm text-foreground">{result.message}</p>

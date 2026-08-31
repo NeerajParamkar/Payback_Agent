@@ -1,11 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import { handlePaymentWebhookEvent } from "@/lib/agent";
+import { processRazorpayWebhookEvent } from "@/lib/razorpay-webhook";
 import { verifyWebhookSignature } from "@/lib/razorpay";
 
 export async function POST(request: NextRequest) {
   const rawBody = await request.text();
   const signature = request.headers.get("x-razorpay-signature");
 
+  // Security: verified BEFORE anything else touches the payload - an invalid
+  // or missing signature never reaches the idempotency log or the transaction
+  // store.
   if (!signature) {
     return NextResponse.json(
       { error: "Missing x-razorpay-signature header." },
@@ -44,8 +47,12 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const result = await handlePaymentWebhookEvent(event);
-    return NextResponse.json({ ok: true, ...result });
+    const result = await processRazorpayWebhookEvent(event);
+    // "retry" means the target order was mid-mutation elsewhere and this
+    // delivery wasn't processed - a 5xx tells Razorpay to redeliver later
+    // rather than silently dropping the event (retry-safe).
+    const status = result.outcome === "retry" || result.outcome === "error" ? 503 : 200;
+    return NextResponse.json({ ok: status === 200, ...result }, { status });
   } catch (error) {
     // Return 500 so Razorpay retries delivery - this is for transient failures
     // (e.g. a concurrent write), not for events we simply don't care about.

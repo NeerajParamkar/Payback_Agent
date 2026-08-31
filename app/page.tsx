@@ -6,6 +6,7 @@ import {
   ArrowDown,
   ArrowUp,
   ArrowUpDown,
+  CheckCircle2,
   IndianRupee,
   Inbox,
   ListChecks,
@@ -14,6 +15,7 @@ import {
   PlayCircle,
   RotateCcw,
   TrendingUp,
+  Zap,
 } from "lucide-react";
 import {
   AlertDialog,
@@ -42,7 +44,9 @@ import {
 import { SiteHeader } from "@/components/site-header";
 import { StatusBadge } from "@/components/status-badge";
 import { TransactionTrailSheet } from "@/components/transaction-trail-sheet";
+import { BATCH_STAGE_LABELS, type BatchStage } from "@/lib/batch-progress";
 import { formatINR, humanize } from "@/lib/format";
+import { cn } from "@/lib/utils";
 import type { Transaction, TransactionStatus } from "@/lib/types";
 
 interface Summary {
@@ -50,6 +54,47 @@ interface Summary {
   totalRecovered: number;
   recoveryRate: number;
   casesProcessed: number;
+}
+
+// Order shown in the "Run Agent" progress stepper - mirrors the pipeline
+// run-batch/route.ts actually walks through (see lib/batch-progress.ts).
+const PIPELINE_STAGES: BatchStage[] = [
+  "scanning",
+  "finding_revenue_at_risk",
+  "analysing_customer_history",
+  "calculating_scores",
+  "finding_root_causes",
+  "selecting_strategies",
+  "executing_actions",
+  "monitoring_payments",
+  "completed",
+];
+
+interface RunSummary {
+  transactionsAnalysed: number;
+  totalAtRisk: number;
+  totalRecovered: number;
+  recoveryRate: number;
+  recoveryCasesCreated: number;
+  actionsExecuted: number;
+  humanEscalations: number;
+}
+
+function RunStat({
+  label,
+  value,
+  valueClassName,
+}: {
+  label: string;
+  value: string;
+  valueClassName?: string;
+}) {
+  return (
+    <div>
+      <p className="text-xs text-muted-foreground">{label}</p>
+      <p className={cn("text-lg font-semibold text-foreground", valueClassName)}>{value}</p>
+    </div>
+  );
 }
 
 function computeSummary(transactions: Transaction[]): Summary {
@@ -118,9 +163,11 @@ const STATUS_SORT_RANK: Record<TransactionStatus, number> = {
   pending: 0,
   waiting_for_response: 1,
   awaiting_payment: 2,
-  in_progress: 3,
-  recovered: 4,
-  unrecovered: 5,
+  escalated: 3,
+  promise_to_pay: 4,
+  in_progress: 5,
+  recovered: 6,
+  unrecovered: 7,
 };
 
 interface SortableHeadProps {
@@ -170,7 +217,9 @@ export default function Home() {
   const [batchProgress, setBatchProgress] = useState<{
     total: number;
     completed: number;
+    stage: BatchStage;
   } | null>(null);
+  const [lastRunSummary, setLastRunSummary] = useState<RunSummary | null>(null);
   const [resetting, setResetting] = useState(false);
   const [resetDialogOpen, setResetDialogOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -208,7 +257,7 @@ export default function Home() {
         const res = await fetch("/api/run-batch/progress");
         const data = await res.json();
         if (!cancelled) {
-          setBatchProgress({ total: data.total, completed: data.completed });
+          setBatchProgress({ total: data.total, completed: data.completed, stage: data.stage });
         }
       } catch {
         // polling failure isn't critical - just skip this tick
@@ -236,6 +285,7 @@ export default function Home() {
       if (!res.ok) throw new Error(data.error ?? "Batch run failed.");
       setTransactions(data.transactions);
       setRunErrors(data.errors ?? {});
+      setLastRunSummary(data.summary ?? null);
       setSelectedIds(new Set());
       setSelectedTransaction((prev) =>
         prev
@@ -254,6 +304,7 @@ export default function Home() {
     setResetting(true);
     setError(null);
     setRunErrors({});
+    setLastRunSummary(null);
     setSelectedTransaction(null);
     setSelectedIds(new Set());
     try {
@@ -399,16 +450,79 @@ export default function Home() {
         </div>
 
         {running && (
-          <div className="mb-6 rounded-lg border border-border bg-card px-4 py-3">
+          <div className="mb-6 rounded-lg border border-border bg-card px-4 py-4">
             <div className="mb-2 flex items-center justify-between text-sm">
-              <span className="text-foreground">Processing transactions...</span>
+              <span className="font-medium text-foreground">
+                {batchProgress ? BATCH_STAGE_LABELS[batchProgress.stage] : "Starting..."}
+              </span>
               <span className="tabular-nums text-muted-foreground">
                 {batchProgress
                   ? `${batchProgress.completed} of ${batchProgress.total} (${progressPercent}%)`
-                  : "Starting..."}
+                  : ""}
               </span>
             </div>
-            <Progress value={batchProgress ? progressPercent : 0} />
+            <Progress value={batchProgress ? progressPercent : 0} className="mb-4" />
+            <ol className="flex flex-wrap items-center gap-y-2 text-xs">
+              {PIPELINE_STAGES.map((stage, i) => {
+                const currentIndex = batchProgress
+                  ? PIPELINE_STAGES.indexOf(batchProgress.stage)
+                  : -1;
+                const state = i < currentIndex ? "done" : i === currentIndex ? "active" : "pending";
+                return (
+                  <li key={stage} className="flex items-center">
+                    {i > 0 && <span className="mx-1.5 text-muted-foreground/40">&rarr;</span>}
+                    <span
+                      className={cn(
+                        "inline-flex items-center gap-1 rounded-full px-2 py-1 whitespace-nowrap",
+                        state === "done" && "bg-success/10 text-success",
+                        state === "active" && "bg-brand-blue/10 text-brand-blue",
+                        state === "pending" && "text-muted-foreground/50"
+                      )}
+                    >
+                      {state === "done" && <CheckCircle2 className="size-3" />}
+                      {state === "active" && <Loader2 className="size-3 animate-spin" />}
+                      {BATCH_STAGE_LABELS[stage].replace(/\.\.\.$|\.$/, "")}
+                    </span>
+                  </li>
+                );
+              })}
+            </ol>
+          </div>
+        )}
+
+        {lastRunSummary && !running && (
+          <div className="mb-6 rounded-lg border border-border bg-card p-4">
+            <div className="mb-3 flex items-center gap-2 text-sm font-medium text-foreground">
+              <Zap className="size-4 text-brand-blue" />
+              Agent Run Report
+            </div>
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 lg:grid-cols-7">
+              <RunStat
+                label="Transactions Analysed"
+                value={String(lastRunSummary.transactionsAnalysed)}
+              />
+              <RunStat label="Revenue at Risk" value={formatINR(lastRunSummary.totalAtRisk)} />
+              <RunStat
+                label="Recovery Cases Created"
+                value={String(lastRunSummary.recoveryCasesCreated)}
+              />
+              <RunStat label="Actions Executed" value={String(lastRunSummary.actionsExecuted)} />
+              <RunStat
+                label="Human Escalations"
+                value={String(lastRunSummary.humanEscalations)}
+                valueClassName={lastRunSummary.humanEscalations > 0 ? "text-warning" : undefined}
+              />
+              <RunStat
+                label="Revenue Recovered"
+                value={formatINR(lastRunSummary.totalRecovered)}
+                valueClassName="text-success"
+              />
+              <RunStat
+                label="Recovery Rate"
+                value={`${lastRunSummary.recoveryRate}%`}
+                valueClassName="text-brand-blue"
+              />
+            </div>
           </div>
         )}
 
@@ -583,6 +697,12 @@ export default function Home() {
         transaction={selectedTransaction}
         onOpenChange={(open) => {
           if (!open) setSelectedTransaction(null);
+        }}
+        onTransactionUpdated={(updated) => {
+          setTransactions((prev) =>
+            prev ? prev.map((t) => (t.id === updated.id ? updated : t)) : prev
+          );
+          setSelectedTransaction(updated);
         }}
       />
     </div>
