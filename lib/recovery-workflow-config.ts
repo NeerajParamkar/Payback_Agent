@@ -11,6 +11,12 @@ export interface RecoveryWorkflowConfig {
   // the workflow never fires two actions back-to-back in the same run, even for a 0-hour root cause.
   maxRecoveryDurationHours: number; // hard ceiling on total elapsed time since recovery started (first attempt)
   highValueEscalationThreshold: number; // INR - an order at or above this amount escalates to a human before automation acts at all
+  // A FLAT threshold alone misses a real anomaly: a customer who normally
+  // transacts small amounts suddenly attempting something many times their
+  // own historical average is a meaningful signal on its own, independent of
+  // whether the absolute amount ever crosses highValueEscalationThreshold -
+  // see the "unusual_amount_spike" rule in lib/recovery-decision-engine.ts.
+  amountSpikeMultiplier: number; // e.g. 5 = escalate when amount >= 5x this customer's own average past transaction
 }
 
 export const DEFAULT_RECOVERY_WORKFLOW_CONFIG: RecoveryWorkflowConfig = {
@@ -21,6 +27,7 @@ export const DEFAULT_RECOVERY_WORKFLOW_CONFIG: RecoveryWorkflowConfig = {
   delayBetweenActionsHours: 1,
   maxRecoveryDurationHours: 168, // 1 week
   highValueEscalationThreshold: 10_000,
+  amountSpikeMultiplier: 5,
 };
 
 function envNumber(name: string, fallback: number): number {
@@ -59,6 +66,10 @@ export function getRecoveryWorkflowConfig(): RecoveryWorkflowConfig {
     highValueEscalationThreshold: envNumber(
       "RECOVERY_HIGH_VALUE_THRESHOLD",
       DEFAULT_RECOVERY_WORKFLOW_CONFIG.highValueEscalationThreshold
+    ),
+    amountSpikeMultiplier: envNumber(
+      "RECOVERY_AMOUNT_SPIKE_MULTIPLIER",
+      DEFAULT_RECOVERY_WORKFLOW_CONFIG.amountSpikeMultiplier
     ),
   };
 }

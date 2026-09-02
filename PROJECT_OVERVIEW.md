@@ -512,3 +512,143 @@ still treated as full recovery by `isOrderPaid`; a promise-to-pay deadline
 only resolves to kept/broken when something next touches that transaction
 (no background scheduler). All three are pre-existing design trade-offs, not
 regressions — flagged rather than silently rewritten.
+
+---
+
+## 18. Diagnosis quality — gateway error hints (fewer "unknown" root causes)
+
+Root-cause diagnoses were landing on `unknown` far more than expected —
+correctly so, given what the AI actually had to work with. Each transaction
+only carried a coarse `type` (`payment_failed` / `checkout_abandoned` /
+`subscription_failed` / `invoice_overdue`) and `amount`; `trueFailureReason`
+is deliberately hidden (it's simulation ground truth, not something a real
+gateway would ever hand the AI). For `checkout_abandoned`/`invoice_overdue`
+that's plenty of signal, but for `payment_failed`/`subscription_failed` it's
+genuinely ambiguous between 7 different root causes — so the AI, correctly
+following its own instructions ("don't force-fit a cause you can't support"),
+defaulted to `unknown` + `low` confidence on most first attempts.
+
+- **`Transaction.gatewayErrorHint`** (`lib/types.ts`) — a realistic,
+  gateway-style error message available at the time of the *original*
+  failure (e.g. `"Card declined — issuer reports the card has expired."`),
+  mirroring what a real Razorpay failed-payment webhook/API response would
+  already show a merchant, even before any recovery attempt. Populated in
+  the seed data for the 20 of 28 transactions where a real gateway attempt
+  would plausibly have occurred — deliberately omitted for
+  checkout-abandonment/pure-overdue-invoice cases, where no payment was ever
+  actually attempted.
+- **`lib/diagnose.ts`** — this hint (plus, on a retry, a REAL Razorpay
+  webhook-reported failure reason for this order's own most recent payment
+  attempt — `lib/agent.ts` distinguishes genuine gateway data from the
+  system's own simulated guesses by checking `PaymentAttempt.razorpayPaymentId`)
+  is fed into the diagnosis prompt with explicit instructions to treat it as
+  real evidence: name a specific cause with high confidence when the hint
+  clearly supports one, and reserve `unknown` for when there's truly no
+  signal at all (a bare "declined, no code" hint still supports `bank_decline`
+  specifically — that much genuinely is known).
+
+Verified live: 5 previously-`unknown` transactions all resolved to their
+exact hidden root cause with `high` confidence once hinted (network_failure,
+insufficient_funds, card_failure, bank_decline, authentication_failure);
+un-hinted checkout-abandonment/overdue-invoice cases were unaffected, still
+correctly diagnosed from `type` alone. A useful side effect: with genuine
+high confidence, the policy engine now mints a real Payment Link on the
+first attempt where it used to conservatively `wait`.
+
+---
+
+## 19. Customer history & the customer detail page
+
+Every customer in the dataset had exactly one transaction — nothing for
+Customer Recovery Intelligence to actually learn a *pattern* from, and no
+way to drill into a customer's full track record from the UI.
+
+- **`data/customer-history.json`** — one realistic, already-resolved PAST
+  transaction per customer (28 total), each with full attempt/decision/
+  payment-attempt detail, generated with genuine variety rather than cloned:
+  8 recovered on the first attempt via a real payment link, 8 via an email
+  reminder, 6 recovered on the *second* attempt (reminder failed, then a
+  payment link succeeded), 6 never recovered (3 failed attempts, handed
+  off). Payment delays range 2h–367h.
+- **`lib/customer-history-store.ts`** — reads that file. Deliberately its
+  own permanent store, separate from `transactions.json`/`transactions-seed.json`:
+  it never appears in the operational Dashboard/Insights/Overview tables
+  (which should only reflect the *current* at-risk batch), and — this is the
+  important part — **it is never touched by `POST /api/reset`**. "Reset Demo
+  Data" resets the current session's mutable state; this is permanent
+  baseline history and survives every reset.
+- Wired into three places: `/api/customers` and `/api/customers/[customerId]`
+  (combined with live transactions before profiles/scores are built), and
+  `run-batch/route.ts`'s `customerHistory` context — so the AI's diagnosis
+  prompt for a customer's current at-risk transaction now sees their real
+  track record, not a blank slate.
+- **`app/customers/[customerId]/page.tsx`** (new) — clicking a customer on
+  `/customers` now navigates to a full detail page instead of opening a side
+  sheet: a Risk badge (Low/Medium/High + the 0–100 score), stat tiles, the
+  full Recovery Score factor breakdown, and a complete transaction history
+  table (Failed On / Recovered On dates, status, attempts, drill-down into
+  the same attempt-by-attempt trail used everywhere else). `site-header.tsx`'s
+  active-nav-tab logic was fixed to recognize `/customers/*` sub-pages as
+  part of the Customers section (it previously only matched exact paths).
+
+---
+
+## 20. Dashboard: Current vs. Previous Records
+
+`app/page.tsx` now has two views behind a sliding tab switcher instead of one
+long page:
+
+- **Current Records** — the existing operational table, unchanged, plus a
+  5th stat card, **Remaining** (`Total At Risk − Total Recovered`).
+- **Previous Records** (new) — reads `/api/customer-history`: its own 5
+  money stats scoped to history only, **Avg Attempts to Resolve**, **Avg
+  Time to Recover**, a **Recovered via** channel breakdown (Payment Link /
+  Reminder / Unrecovered, red bar for the unrecovered slice), a "What this
+  tells the agent" card of auto-generated plain-English observations, and
+  the full previous-transactions table.
+- **Reset Demo Data** and **Run Batch** only render on the Current Records
+  tab now — they have no meaning against read-only history, and used to
+  show regardless of which tab was active.
+- **Find + date-range filter, on both tables**, plus a sortable **Created**
+  column on Current Records (it didn't show any date before) and sortable
+  **Failed On**/**Recovered On** columns on Previous Records (previously
+  static, date-only — now date + time).
+- **Filtering scopes what the agent analyses.** If the table is narrowed by
+  the find/date filter and no row is explicitly checked, the Run Batch
+  button becomes **"Run Filtered (N)"** and only sends that visible subset —
+  explicit checkbox selection still takes priority over the filter. "Select
+  all" likewise selects only the currently-visible rows, not the whole
+  underlying set.
+
+---
+
+## 21. Smarter escalation — relative amount-spike detection
+
+The existing `high_value_transaction` rule (§ Recovery Decision Engine, in
+`lib/recovery-decision-engine.ts`) is a flat threshold: any order at or above
+₹10,000 (configurable) escalates, for every customer alike. That misses a
+real anomaly the other direction: a customer whose normal spend is, say,
+₹100 suddenly attempting ₹5,000 is a meaningful signal on its own — well
+under the flat threshold, but a 50x jump from *their own* baseline.
+
+- **New rule, `unusual_amount_spike`** — runs alongside (not instead of) the
+  flat threshold, on the first attempt only. Compares the order amount
+  against this specific customer's own average PAST transaction amount
+  (`lib/customer-recovery.ts`'s `buildAveragePastAmountByCustomer`, computed
+  strictly from `customer-history.json` — never from the transaction
+  currently being evaluated, so the anomaly can't dilute its own baseline).
+  Escalates when the amount is **≥ 5x** that average (configurable via
+  `RECOVERY_AMOUNT_SPIKE_MULTIPLIER`). A customer with no history yet is
+  correctly skipped — nothing to be "sudden" relative to.
+- Both rules can fire together: an order that's genuinely large *and* a
+  spike for that specific customer carries both reasons in the Escalation
+  Queue.
+- The customer's historical average is also mentioned in the diagnosis
+  prompt for extra AI context, but the actual escalation decision stays
+  fully deterministic in the policy engine — consistent with how every other
+  rule here works; the AI never decides this on its own judgment.
+
+Verified with 5 targeted decision-engine scenarios (the small-customer-spike
+case, a large-but-normal-for-them case, no-history, flat-threshold-still-works,
+both-rules-firing-together) plus a full regression pass on the pre-existing
+rules.

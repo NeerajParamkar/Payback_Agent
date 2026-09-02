@@ -1,0 +1,1541 @@
+[
+  {
+    "id": "TXN-H0001",
+    "customerName": "Arjun Nair",
+    "amount": 1450,
+    "type": "payment_failed",
+    "trueFailureReason": "network_failure",
+    "gatewayErrorHint": "Gateway timeout — no response received from the bank within the expected window.",
+    "createdAt": "2026-07-01T07:45:00.000Z",
+    "status": "recovered",
+    "attempts": [
+      {
+        "attemptNumber": 1,
+        "timestamp": "2026-07-01T11:45:00.000Z",
+        "diagnosedReason": "network_failure",
+        "recommendedAction": "retry_payment_same_method",
+        "actionTaken": "generated_payment_link",
+        "actionDetail": "We're re-attempting your payment of ₹1450 (same method). Complete it securely here: https://rzp.io/rzp/DEMO0",
+        "outcome": "paid",
+        "confidence": "high",
+        "recoveryProbability": 0.8,
+        "priority": "medium",
+        "diagnosisRationale": "Gateway error (Gateway timeout — no response received from the bank within the expected window.) clearly supports network_failure; a same-method retry is the appropriate next step.",
+        "decisionAction": "generate_payment_link",
+        "policyOverridden": false,
+        "policyReason": "AI recommendation (generate_payment_link) accepted as-is.",
+        "paymentLinkId": "plink_demo_TXN-0001_0",
+        "paymentLinkUrl": "https://rzp.io/rzp/DEMO0",
+        "respondedAt": "2026-07-16T14:45:00.000Z"
+      }
+    ],
+    "paymentAttempts": [
+      {
+        "id": "54937e96-9b04-4251-ad71-4f47e32c7f8b",
+        "recoveryAttemptNumber": 1,
+        "status": "captured",
+        "amount": 1450,
+        "paymentLinkId": "plink_demo_TXN-0001_0",
+        "method": "card",
+        "createdAt": "2026-07-01T11:45:00.000Z",
+        "updatedAt": "2026-07-16T14:45:00.000Z"
+      }
+    ]
+  },
+  {
+    "id": "TXN-H0002",
+    "customerName": "Abhishek Yadav",
+    "customerEmail": "REPLACE_WITH_YOUR_EMAIL@example.com",
+    "amount": 2705,
+    "type": "checkout_abandoned",
+    "trueFailureReason": "checkout_abandonment",
+    "createdAt": "2026-06-25T07:51:00.000Z",
+    "status": "recovered",
+    "attempts": [
+      {
+        "attemptNumber": 1,
+        "timestamp": "2026-06-25T10:51:00.000Z",
+        "diagnosedReason": "checkout_abandonment",
+        "recommendedAction": "send_email_reminder",
+        "actionTaken": "sent_email_reminder",
+        "actionDetail": "Hi Abhishek, it looks like your order of ₹2705 was not completed. If you'd like to finish your purchase, please click the link below to complete payment. Thank you!",
+        "outcome": "paid",
+        "confidence": "high",
+        "recoveryProbability": 0.6,
+        "priority": "low",
+        "diagnosisRationale": "Transaction marked checkout_abandoned with no payment error; a reminder is the appropriate first step.",
+        "decisionAction": "send_email",
+        "policyOverridden": false,
+        "policyReason": "AI recommendation (send_email) accepted as-is.",
+        "respondedAt": "2026-06-25T11:51:00.000Z"
+      }
+    ],
+    "paymentAttempts": [
+      {
+        "id": "1c50287b-cf5f-45cd-8c25-2228b5ffd68d",
+        "recoveryAttemptNumber": 1,
+        "status": "captured",
+        "amount": 2705,
+        "createdAt": "2026-06-25T10:51:00.000Z",
+        "updatedAt": "2026-06-25T11:51:00.000Z"
+      }
+    ]
+  },
+  {
+    "id": "TXN-H0003",
+    "customerName": "Vikram Singh",
+    "amount": 3310,
+    "type": "invoice_overdue",
+    "trueFailureReason": "upi_failure",
+    "gatewayErrorHint": "UPI payment timed out — no PIN entered within the allotted window at the payer's app.",
+    "createdAt": "2026-06-20T07:57:00.000Z",
+    "status": "recovered",
+    "attempts": [
+      {
+        "attemptNumber": 1,
+        "timestamp": "2026-06-20T09:57:00.000Z",
+        "diagnosedReason": "upi_failure",
+        "recommendedAction": "send_sms_reminder",
+        "actionTaken": "sent_reminder",
+        "actionDetail": "We noticed your payment of ₹3310 didn't go through. Please try again or reach out if you need help.",
+        "outcome": "declined_again",
+        "confidence": "medium",
+        "recoveryProbability": 0.5,
+        "priority": "medium",
+        "diagnosisRationale": "Gateway error (UPI payment timed out — no PIN entered within the allotted window at the payer's app.) suggests upi_failure; a light-touch reminder was tried first.",
+        "decisionAction": "send_reminder",
+        "policyOverridden": false,
+        "policyReason": "AI recommendation (send_reminder) accepted as-is.",
+        "nextAttemptEligibleAt": "2026-06-21T09:57:00.000Z"
+      },
+      {
+        "attemptNumber": 2,
+        "timestamp": "2026-06-21T09:57:00.000Z",
+        "diagnosedReason": "upi_failure",
+        "recommendedAction": "retry_payment_same_method",
+        "actionTaken": "generated_payment_link",
+        "actionDetail": "Just a reminder — you can still complete your payment of ₹3310 securely here: https://rzp.io/rzp/DEMO2B",
+        "outcome": "paid",
+        "confidence": "high",
+        "recoveryProbability": 0.75,
+        "priority": "medium",
+        "diagnosisRationale": "First reminder did not convert; escalating to a real Payment Link on the second attempt.",
+        "decisionAction": "generate_payment_link",
+        "policyOverridden": false,
+        "policyReason": "AI recommendation (generate_payment_link) accepted as-is.",
+        "paymentLinkId": "plink_demo_TXN-0003_2b",
+        "paymentLinkUrl": "https://rzp.io/rzp/DEMO2B",
+        "respondedAt": "2026-06-25T09:57:00.000Z"
+      }
+    ],
+    "paymentAttempts": [
+      {
+        "id": "892a4f33-2807-46b8-8d6f-e7985ee7c192",
+        "recoveryAttemptNumber": 2,
+        "status": "captured",
+        "amount": 3310,
+        "paymentLinkId": "plink_demo_TXN-0003_2b",
+        "method": "card",
+        "createdAt": "2026-06-21T09:57:00.000Z",
+        "updatedAt": "2026-06-25T09:57:00.000Z"
+      }
+    ]
+  },
+  {
+    "id": "TXN-H0004",
+    "customerName": "Kavya Iyer",
+    "customerEmail": "REPLACE_WITH_YOUR_EMAIL@example.com",
+    "amount": 4265,
+    "type": "checkout_abandoned",
+    "trueFailureReason": "upi_failure",
+    "gatewayErrorHint": "UPI payment timed out — no PIN entered within the allotted window at the payer's app.",
+    "createdAt": "2026-06-09T07:08:00.000Z",
+    "status": "unrecovered",
+    "attempts": [
+      {
+        "attemptNumber": 1,
+        "timestamp": "2026-06-09T09:08:00.000Z",
+        "diagnosedReason": "upi_failure",
+        "recommendedAction": "retry_payment_same_method",
+        "actionTaken": "generated_payment_link",
+        "actionDetail": "We're re-attempting your payment of ₹4265 (same method). Complete it securely here: https://rzp.io/rzp/DEMO3U",
+        "outcome": "declined_again",
+        "confidence": "medium",
+        "recoveryProbability": 0.4,
+        "priority": "medium",
+        "diagnosisRationale": "Gateway error (UPI payment timed out — no PIN entered within the allotted window at the payer's app.) suggests upi_failure.",
+        "decisionAction": "generate_payment_link",
+        "policyOverridden": false,
+        "policyReason": "AI recommendation (generate_payment_link) accepted as-is.",
+        "paymentLinkId": "plink_demo_TXN-0004_3u1",
+        "paymentLinkUrl": "https://rzp.io/rzp/DEMO3U",
+        "nextAttemptEligibleAt": "2026-06-10T09:08:00.000Z"
+      },
+      {
+        "attemptNumber": 2,
+        "timestamp": "2026-06-10T09:08:00.000Z",
+        "diagnosedReason": "upi_failure",
+        "recommendedAction": "retry_payment_alternate_method",
+        "actionTaken": "generated_payment_link",
+        "actionDetail": "Let's try a different payment method for your ₹4265 order: https://rzp.io/rzp/DEMO3U2",
+        "outcome": "declined_again",
+        "confidence": "medium",
+        "recoveryProbability": 0.3,
+        "priority": "high",
+        "diagnosisRationale": "First retry on the same method failed again; suggesting an alternate method.",
+        "decisionAction": "generate_payment_link",
+        "policyOverridden": false,
+        "policyReason": "AI recommendation (generate_payment_link) accepted as-is.",
+        "paymentLinkId": "plink_demo_TXN-0004_3u2",
+        "paymentLinkUrl": "https://rzp.io/rzp/DEMO3U2",
+        "nextAttemptEligibleAt": "2026-06-12T09:08:00.000Z"
+      },
+      {
+        "attemptNumber": 3,
+        "timestamp": "2026-06-12T09:08:00.000Z",
+        "diagnosedReason": "upi_failure",
+        "recommendedAction": "mark_unrecoverable",
+        "actionTaken": "stopped_by_policy",
+        "actionDetail": "Maximum automated recovery attempts reached; handing off to a human.",
+        "outcome": "no_response",
+        "confidence": "low",
+        "recoveryProbability": 0.1,
+        "priority": "high",
+        "diagnosisRationale": "Two attempts already failed with no response; recovery is unlikely to succeed further.",
+        "decisionAction": "stop",
+        "policyOverridden": false,
+        "policyReason": "AI recommendation (stop) accepted as-is."
+      }
+    ],
+    "paymentAttempts": [
+      {
+        "id": "2baf67b1-cbd5-4c54-94a3-2569a8927c86",
+        "recoveryAttemptNumber": 1,
+        "status": "failed",
+        "amount": 4265,
+        "paymentLinkId": "plink_demo_TXN-0004_3u1",
+        "failureReason": "upi_failure",
+        "createdAt": "2026-06-09T09:08:00.000Z",
+        "updatedAt": "2026-06-09T09:08:00.000Z"
+      },
+      {
+        "id": "4852f849-87c5-4ba8-a175-5f84b0af7d4c",
+        "recoveryAttemptNumber": 2,
+        "status": "failed",
+        "amount": 4265,
+        "paymentLinkId": "plink_demo_TXN-0004_3u2",
+        "failureReason": "upi_failure",
+        "createdAt": "2026-06-10T09:08:00.000Z",
+        "updatedAt": "2026-06-10T09:08:00.000Z"
+      }
+    ]
+  },
+  {
+    "id": "TXN-H0005",
+    "customerName": "Siddharth Rao",
+    "amount": 5570,
+    "type": "payment_failed",
+    "trueFailureReason": "authentication_failure",
+    "gatewayErrorHint": "Payment failed — 3-D Secure / OTP authentication was not completed in time.",
+    "createdAt": "2026-06-29T05:49:00.000Z",
+    "status": "recovered",
+    "attempts": [
+      {
+        "attemptNumber": 1,
+        "timestamp": "2026-06-29T09:49:00.000Z",
+        "diagnosedReason": "authentication_failure",
+        "recommendedAction": "retry_payment_same_method",
+        "actionTaken": "generated_payment_link",
+        "actionDetail": "We're re-attempting your payment of ₹5570 (same method). Complete it securely here: https://rzp.io/rzp/DEMO4",
+        "outcome": "paid",
+        "confidence": "high",
+        "recoveryProbability": 0.8,
+        "priority": "medium",
+        "diagnosisRationale": "Gateway error (Payment failed — 3-D Secure / OTP authentication was not completed in time.) clearly supports authentication_failure; a same-method retry is the appropriate next step.",
+        "decisionAction": "generate_payment_link",
+        "policyOverridden": false,
+        "policyReason": "AI recommendation (generate_payment_link) accepted as-is.",
+        "paymentLinkId": "plink_demo_TXN-0005_4",
+        "paymentLinkUrl": "https://rzp.io/rzp/DEMO4",
+        "respondedAt": "2026-06-29T23:49:00.000Z"
+      }
+    ],
+    "paymentAttempts": [
+      {
+        "id": "0efa8a4d-a94a-4120-9476-ded1cae973cc",
+        "recoveryAttemptNumber": 1,
+        "status": "captured",
+        "amount": 5570,
+        "paymentLinkId": "plink_demo_TXN-0005_4",
+        "method": "upi",
+        "createdAt": "2026-06-29T09:49:00.000Z",
+        "updatedAt": "2026-06-29T23:49:00.000Z"
+      }
+    ]
+  },
+  {
+    "id": "TXN-H0006",
+    "customerName": "Rahul Sharma",
+    "amount": 7075,
+    "type": "checkout_abandoned",
+    "trueFailureReason": "checkout_abandonment",
+    "createdAt": "2026-06-24T05:55:00.000Z",
+    "status": "recovered",
+    "attempts": [
+      {
+        "attemptNumber": 1,
+        "timestamp": "2026-06-24T08:55:00.000Z",
+        "diagnosedReason": "checkout_abandonment",
+        "recommendedAction": "send_email_reminder",
+        "actionTaken": "sent_email_reminder",
+        "actionDetail": "Hi Rahul, it looks like your order of ₹7075 was not completed. If you'd like to finish your purchase, please click the link below to complete payment. Thank you!",
+        "outcome": "paid",
+        "confidence": "high",
+        "recoveryProbability": 0.6,
+        "priority": "low",
+        "diagnosisRationale": "Transaction marked checkout_abandoned with no payment error; a reminder is the appropriate first step.",
+        "decisionAction": "send_email",
+        "policyOverridden": false,
+        "policyReason": "AI recommendation (send_email) accepted as-is.",
+        "respondedAt": "2026-07-02T23:55:00.000Z"
+      }
+    ],
+    "paymentAttempts": [
+      {
+        "id": "e4e642f2-e389-430d-8dc6-2e0637183b6a",
+        "recoveryAttemptNumber": 1,
+        "status": "captured",
+        "amount": 7075,
+        "createdAt": "2026-06-24T08:55:00.000Z",
+        "updatedAt": "2026-07-02T23:55:00.000Z"
+      }
+    ]
+  },
+  {
+    "id": "TXN-H0007",
+    "customerName": "Pooja Joshi",
+    "amount": 1180,
+    "type": "invoice_overdue",
+    "trueFailureReason": "bank_decline",
+    "gatewayErrorHint": "Transaction declined by the issuing bank. No further reason code provided.",
+    "createdAt": "2026-06-18T06:01:00.000Z",
+    "status": "recovered",
+    "attempts": [
+      {
+        "attemptNumber": 1,
+        "timestamp": "2026-06-18T08:01:00.000Z",
+        "diagnosedReason": "bank_decline",
+        "recommendedAction": "send_sms_reminder",
+        "actionTaken": "sent_reminder",
+        "actionDetail": "We noticed your payment of ₹1180 didn't go through. Please try again or reach out if you need help.",
+        "outcome": "declined_again",
+        "confidence": "medium",
+        "recoveryProbability": 0.5,
+        "priority": "medium",
+        "diagnosisRationale": "Gateway error (Transaction declined by the issuing bank. No further reason code provided.) suggests bank_decline; a light-touch reminder was tried first.",
+        "decisionAction": "send_reminder",
+        "policyOverridden": false,
+        "policyReason": "AI recommendation (send_reminder) accepted as-is.",
+        "nextAttemptEligibleAt": "2026-06-19T08:01:00.000Z"
+      },
+      {
+        "attemptNumber": 2,
+        "timestamp": "2026-06-19T08:01:00.000Z",
+        "diagnosedReason": "bank_decline",
+        "recommendedAction": "retry_payment_same_method",
+        "actionTaken": "generated_payment_link",
+        "actionDetail": "Just a reminder — you can still complete your payment of ₹1180 securely here: https://rzp.io/rzp/DEMO6B",
+        "outcome": "paid",
+        "confidence": "high",
+        "recoveryProbability": 0.75,
+        "priority": "medium",
+        "diagnosisRationale": "First reminder did not convert; escalating to a real Payment Link on the second attempt.",
+        "decisionAction": "generate_payment_link",
+        "policyOverridden": false,
+        "policyReason": "AI recommendation (generate_payment_link) accepted as-is.",
+        "paymentLinkId": "plink_demo_TXN-0007_6b",
+        "paymentLinkUrl": "https://rzp.io/rzp/DEMO6B",
+        "respondedAt": "2026-06-19T14:01:00.000Z"
+      }
+    ],
+    "paymentAttempts": [
+      {
+        "id": "8a7cf223-36e6-4847-8f5e-3e3e2a5a3839",
+        "recoveryAttemptNumber": 2,
+        "status": "captured",
+        "amount": 1180,
+        "paymentLinkId": "plink_demo_TXN-0007_6b",
+        "method": "card",
+        "createdAt": "2026-06-19T08:01:00.000Z",
+        "updatedAt": "2026-06-19T14:01:00.000Z"
+      }
+    ]
+  },
+  {
+    "id": "TXN-H0008",
+    "customerName": "Ishita Rao",
+    "customerEmail": "REPLACE_WITH_YOUR_EMAIL@example.com",
+    "amount": 9950,
+    "type": "checkout_abandoned",
+    "trueFailureReason": "bank_decline",
+    "gatewayErrorHint": "Transaction declined by the issuing bank. No further reason code provided.",
+    "createdAt": "2026-06-10T05:12:00.000Z",
+    "status": "unrecovered",
+    "attempts": [
+      {
+        "attemptNumber": 1,
+        "timestamp": "2026-06-10T07:12:00.000Z",
+        "diagnosedReason": "bank_decline",
+        "recommendedAction": "retry_payment_same_method",
+        "actionTaken": "generated_payment_link",
+        "actionDetail": "We're re-attempting your payment of ₹9950 (same method). Complete it securely here: https://rzp.io/rzp/DEMO7U",
+        "outcome": "declined_again",
+        "confidence": "medium",
+        "recoveryProbability": 0.4,
+        "priority": "medium",
+        "diagnosisRationale": "Gateway error (Transaction declined by the issuing bank. No further reason code provided.) suggests bank_decline.",
+        "decisionAction": "generate_payment_link",
+        "policyOverridden": false,
+        "policyReason": "AI recommendation (generate_payment_link) accepted as-is.",
+        "paymentLinkId": "plink_demo_TXN-0008_7u1",
+        "paymentLinkUrl": "https://rzp.io/rzp/DEMO7U",
+        "nextAttemptEligibleAt": "2026-06-11T07:12:00.000Z"
+      },
+      {
+        "attemptNumber": 2,
+        "timestamp": "2026-06-11T07:12:00.000Z",
+        "diagnosedReason": "bank_decline",
+        "recommendedAction": "retry_payment_alternate_method",
+        "actionTaken": "generated_payment_link",
+        "actionDetail": "Let's try a different payment method for your ₹9950 order: https://rzp.io/rzp/DEMO7U2",
+        "outcome": "declined_again",
+        "confidence": "medium",
+        "recoveryProbability": 0.3,
+        "priority": "high",
+        "diagnosisRationale": "First retry on the same method failed again; suggesting an alternate method.",
+        "decisionAction": "generate_payment_link",
+        "policyOverridden": false,
+        "policyReason": "AI recommendation (generate_payment_link) accepted as-is.",
+        "paymentLinkId": "plink_demo_TXN-0008_7u2",
+        "paymentLinkUrl": "https://rzp.io/rzp/DEMO7U2",
+        "nextAttemptEligibleAt": "2026-06-13T07:12:00.000Z"
+      },
+      {
+        "attemptNumber": 3,
+        "timestamp": "2026-06-13T07:12:00.000Z",
+        "diagnosedReason": "bank_decline",
+        "recommendedAction": "mark_unrecoverable",
+        "actionTaken": "stopped_by_policy",
+        "actionDetail": "Maximum automated recovery attempts reached; handing off to a human.",
+        "outcome": "no_response",
+        "confidence": "low",
+        "recoveryProbability": 0.1,
+        "priority": "high",
+        "diagnosisRationale": "Two attempts already failed with no response; recovery is unlikely to succeed further.",
+        "decisionAction": "stop",
+        "policyOverridden": false,
+        "policyReason": "AI recommendation (stop) accepted as-is."
+      }
+    ],
+    "paymentAttempts": [
+      {
+        "id": "43799958-44e9-4dd3-b5c4-0b68f43e3414",
+        "recoveryAttemptNumber": 1,
+        "status": "failed",
+        "amount": 9950,
+        "paymentLinkId": "plink_demo_TXN-0008_7u1",
+        "failureReason": "bank_decline",
+        "createdAt": "2026-06-10T07:12:00.000Z",
+        "updatedAt": "2026-06-10T07:12:00.000Z"
+      },
+      {
+        "id": "2fd4d195-16db-42ce-8e3f-2582953bbd16",
+        "recoveryAttemptNumber": 2,
+        "status": "failed",
+        "amount": 9950,
+        "paymentLinkId": "plink_demo_TXN-0008_7u2",
+        "failureReason": "bank_decline",
+        "createdAt": "2026-06-11T07:12:00.000Z",
+        "updatedAt": "2026-06-11T07:12:00.000Z"
+      }
+    ]
+  },
+  {
+    "id": "TXN-H0009",
+    "customerName": "Rohan Mehta",
+    "amount": 2005,
+    "type": "payment_failed",
+    "trueFailureReason": "card_failure",
+    "gatewayErrorHint": "Card declined — issuer reports the card is blocked or restricted.",
+    "createdAt": "2026-06-29T03:53:00.000Z",
+    "status": "recovered",
+    "attempts": [
+      {
+        "attemptNumber": 1,
+        "timestamp": "2026-06-29T07:53:00.000Z",
+        "diagnosedReason": "card_failure",
+        "recommendedAction": "retry_payment_same_method",
+        "actionTaken": "generated_payment_link",
+        "actionDetail": "We're re-attempting your payment of ₹2005 (same method). Complete it securely here: https://rzp.io/rzp/DEMO8",
+        "outcome": "paid",
+        "confidence": "high",
+        "recoveryProbability": 0.8,
+        "priority": "medium",
+        "diagnosisRationale": "Gateway error (Card declined — issuer reports the card is blocked or restricted.) clearly supports card_failure; a same-method retry is the appropriate next step.",
+        "decisionAction": "generate_payment_link",
+        "policyOverridden": false,
+        "policyReason": "AI recommendation (generate_payment_link) accepted as-is.",
+        "paymentLinkId": "plink_demo_TXN-0009_8",
+        "paymentLinkUrl": "https://rzp.io/rzp/DEMO8",
+        "respondedAt": "2026-07-04T13:53:00.000Z"
+      }
+    ],
+    "paymentAttempts": [
+      {
+        "id": "8a4718e2-7693-432e-870d-0761e83ff188",
+        "recoveryAttemptNumber": 1,
+        "status": "captured",
+        "amount": 2005,
+        "paymentLinkId": "plink_demo_TXN-0009_8",
+        "method": "netbanking",
+        "createdAt": "2026-06-29T07:53:00.000Z",
+        "updatedAt": "2026-07-04T13:53:00.000Z"
+      }
+    ]
+  },
+  {
+    "id": "TXN-H0010",
+    "customerName": "Sanya Bhatt",
+    "amount": 7360,
+    "type": "checkout_abandoned",
+    "trueFailureReason": "checkout_abandonment",
+    "createdAt": "2026-06-23T03:59:00.000Z",
+    "status": "recovered",
+    "attempts": [
+      {
+        "attemptNumber": 1,
+        "timestamp": "2026-06-23T06:59:00.000Z",
+        "diagnosedReason": "checkout_abandonment",
+        "recommendedAction": "send_email_reminder",
+        "actionTaken": "sent_email_reminder",
+        "actionDetail": "Hi Sanya, it looks like your order of ₹7360 was not completed. If you'd like to finish your purchase, please click the link below to complete payment. Thank you!",
+        "outcome": "paid",
+        "confidence": "high",
+        "recoveryProbability": 0.6,
+        "priority": "low",
+        "diagnosisRationale": "Transaction marked checkout_abandoned with no payment error; a reminder is the appropriate first step.",
+        "decisionAction": "send_email",
+        "policyOverridden": false,
+        "policyReason": "AI recommendation (send_email) accepted as-is.",
+        "respondedAt": "2026-06-25T00:59:00.000Z"
+      }
+    ],
+    "paymentAttempts": [
+      {
+        "id": "5fba7257-89c0-4481-87c5-51c58564c260",
+        "recoveryAttemptNumber": 1,
+        "status": "captured",
+        "amount": 7360,
+        "createdAt": "2026-06-23T06:59:00.000Z",
+        "updatedAt": "2026-06-25T00:59:00.000Z"
+      }
+    ]
+  },
+  {
+    "id": "TXN-H0011",
+    "customerName": "Karan Malhotra",
+    "amount": 1615,
+    "type": "invoice_overdue",
+    "trueFailureReason": "insufficient_funds",
+    "gatewayErrorHint": "Auto-debit failed — issuing bank reported insufficient funds at time of debit.",
+    "createdAt": "2026-06-19T04:05:00.000Z",
+    "status": "recovered",
+    "attempts": [
+      {
+        "attemptNumber": 1,
+        "timestamp": "2026-06-19T06:05:00.000Z",
+        "diagnosedReason": "insufficient_funds",
+        "recommendedAction": "send_sms_reminder",
+        "actionTaken": "sent_reminder",
+        "actionDetail": "We noticed your payment of ₹1615 didn't go through. Please try again or reach out if you need help.",
+        "outcome": "declined_again",
+        "confidence": "medium",
+        "recoveryProbability": 0.5,
+        "priority": "medium",
+        "diagnosisRationale": "Gateway error (Auto-debit failed — issuing bank reported insufficient funds at time of debit.) suggests insufficient_funds; a light-touch reminder was tried first.",
+        "decisionAction": "send_reminder",
+        "policyOverridden": false,
+        "policyReason": "AI recommendation (send_reminder) accepted as-is.",
+        "nextAttemptEligibleAt": "2026-06-20T06:05:00.000Z"
+      },
+      {
+        "attemptNumber": 2,
+        "timestamp": "2026-06-20T06:05:00.000Z",
+        "diagnosedReason": "insufficient_funds",
+        "recommendedAction": "retry_payment_same_method",
+        "actionTaken": "generated_payment_link",
+        "actionDetail": "Just a reminder — you can still complete your payment of ₹1615 securely here: https://rzp.io/rzp/DEMO10B",
+        "outcome": "paid",
+        "confidence": "high",
+        "recoveryProbability": 0.75,
+        "priority": "medium",
+        "diagnosisRationale": "First reminder did not convert; escalating to a real Payment Link on the second attempt.",
+        "decisionAction": "generate_payment_link",
+        "policyOverridden": false,
+        "policyReason": "AI recommendation (generate_payment_link) accepted as-is.",
+        "paymentLinkId": "plink_demo_TXN-0011_10b",
+        "paymentLinkUrl": "https://rzp.io/rzp/DEMO10B",
+        "respondedAt": "2026-06-20T08:05:00.000Z"
+      }
+    ],
+    "paymentAttempts": [
+      {
+        "id": "a783892c-2ce8-492c-b378-461901a531eb",
+        "recoveryAttemptNumber": 2,
+        "status": "captured",
+        "amount": 1615,
+        "paymentLinkId": "plink_demo_TXN-0011_10b",
+        "method": "card",
+        "createdAt": "2026-06-20T06:05:00.000Z",
+        "updatedAt": "2026-06-20T08:05:00.000Z"
+      }
+    ]
+  },
+  {
+    "id": "TXN-H0012",
+    "customerName": "Ankit Verma",
+    "amount": 2870,
+    "type": "checkout_abandoned",
+    "trueFailureReason": "insufficient_funds",
+    "gatewayErrorHint": "Bank declined the transaction: insufficient balance in account.",
+    "createdAt": "2026-06-08T09:16:00.000Z",
+    "status": "unrecovered",
+    "attempts": [
+      {
+        "attemptNumber": 1,
+        "timestamp": "2026-06-08T11:16:00.000Z",
+        "diagnosedReason": "insufficient_funds",
+        "recommendedAction": "retry_payment_same_method",
+        "actionTaken": "generated_payment_link",
+        "actionDetail": "We're re-attempting your payment of ₹2870 (same method). Complete it securely here: https://rzp.io/rzp/DEMO11U",
+        "outcome": "declined_again",
+        "confidence": "medium",
+        "recoveryProbability": 0.4,
+        "priority": "medium",
+        "diagnosisRationale": "Gateway error (Bank declined the transaction: insufficient balance in account.) suggests insufficient_funds.",
+        "decisionAction": "generate_payment_link",
+        "policyOverridden": false,
+        "policyReason": "AI recommendation (generate_payment_link) accepted as-is.",
+        "paymentLinkId": "plink_demo_TXN-0012_11u1",
+        "paymentLinkUrl": "https://rzp.io/rzp/DEMO11U",
+        "nextAttemptEligibleAt": "2026-06-09T11:16:00.000Z"
+      },
+      {
+        "attemptNumber": 2,
+        "timestamp": "2026-06-09T11:16:00.000Z",
+        "diagnosedReason": "insufficient_funds",
+        "recommendedAction": "retry_payment_alternate_method",
+        "actionTaken": "generated_payment_link",
+        "actionDetail": "Let's try a different payment method for your ₹2870 order: https://rzp.io/rzp/DEMO11U2",
+        "outcome": "declined_again",
+        "confidence": "medium",
+        "recoveryProbability": 0.3,
+        "priority": "high",
+        "diagnosisRationale": "First retry on the same method failed again; suggesting an alternate method.",
+        "decisionAction": "generate_payment_link",
+        "policyOverridden": false,
+        "policyReason": "AI recommendation (generate_payment_link) accepted as-is.",
+        "paymentLinkId": "plink_demo_TXN-0012_11u2",
+        "paymentLinkUrl": "https://rzp.io/rzp/DEMO11U2",
+        "nextAttemptEligibleAt": "2026-06-11T11:16:00.000Z"
+      },
+      {
+        "attemptNumber": 3,
+        "timestamp": "2026-06-11T11:16:00.000Z",
+        "diagnosedReason": "insufficient_funds",
+        "recommendedAction": "mark_unrecoverable",
+        "actionTaken": "stopped_by_policy",
+        "actionDetail": "Maximum automated recovery attempts reached; handing off to a human.",
+        "outcome": "no_response",
+        "confidence": "low",
+        "recoveryProbability": 0.1,
+        "priority": "high",
+        "diagnosisRationale": "Two attempts already failed with no response; recovery is unlikely to succeed further.",
+        "decisionAction": "stop",
+        "policyOverridden": false,
+        "policyReason": "AI recommendation (stop) accepted as-is."
+      }
+    ],
+    "paymentAttempts": [
+      {
+        "id": "68af6e6a-75ef-4f3e-87a2-5f57c4980ce2",
+        "recoveryAttemptNumber": 1,
+        "status": "failed",
+        "amount": 2870,
+        "paymentLinkId": "plink_demo_TXN-0012_11u1",
+        "failureReason": "insufficient_funds",
+        "createdAt": "2026-06-08T11:16:00.000Z",
+        "updatedAt": "2026-06-08T11:16:00.000Z"
+      },
+      {
+        "id": "b5c38882-8528-4084-a991-0a0e26fe22be",
+        "recoveryAttemptNumber": 2,
+        "status": "failed",
+        "amount": 2870,
+        "paymentLinkId": "plink_demo_TXN-0012_11u2",
+        "failureReason": "insufficient_funds",
+        "createdAt": "2026-06-09T11:16:00.000Z",
+        "updatedAt": "2026-06-09T11:16:00.000Z"
+      }
+    ]
+  },
+  {
+    "id": "TXN-H0013",
+    "customerName": "Priya Patel",
+    "amount": 3475,
+    "type": "payment_failed",
+    "trueFailureReason": "network_failure",
+    "gatewayErrorHint": "Gateway timeout — no response received from the bank within the expected window.",
+    "createdAt": "2026-06-28T07:57:00.000Z",
+    "status": "recovered",
+    "attempts": [
+      {
+        "attemptNumber": 1,
+        "timestamp": "2026-06-28T11:57:00.000Z",
+        "diagnosedReason": "network_failure",
+        "recommendedAction": "retry_payment_same_method",
+        "actionTaken": "generated_payment_link",
+        "actionDetail": "We're re-attempting your payment of ₹3475 (same method). Complete it securely here: https://rzp.io/rzp/DEMO12",
+        "outcome": "paid",
+        "confidence": "high",
+        "recoveryProbability": 0.8,
+        "priority": "medium",
+        "diagnosisRationale": "Gateway error (Gateway timeout — no response received from the bank within the expected window.) clearly supports network_failure; a same-method retry is the appropriate next step.",
+        "decisionAction": "generate_payment_link",
+        "policyOverridden": false,
+        "policyReason": "AI recommendation (generate_payment_link) accepted as-is.",
+        "paymentLinkId": "plink_demo_TXN-0013_12",
+        "paymentLinkUrl": "https://rzp.io/rzp/DEMO12",
+        "respondedAt": "2026-07-10T19:57:00.000Z"
+      }
+    ],
+    "paymentAttempts": [
+      {
+        "id": "f40cf7d5-9416-4bfc-a88c-078b4d673600",
+        "recoveryAttemptNumber": 1,
+        "status": "captured",
+        "amount": 3475,
+        "paymentLinkId": "plink_demo_TXN-0013_12",
+        "method": "card",
+        "createdAt": "2026-06-28T11:57:00.000Z",
+        "updatedAt": "2026-07-10T19:57:00.000Z"
+      }
+    ]
+  },
+  {
+    "id": "TXN-H0014",
+    "customerName": "Sneha Reddy",
+    "amount": 4430,
+    "type": "checkout_abandoned",
+    "trueFailureReason": "checkout_abandonment",
+    "createdAt": "2026-06-23T08:03:00.000Z",
+    "status": "recovered",
+    "attempts": [
+      {
+        "attemptNumber": 1,
+        "timestamp": "2026-06-23T11:03:00.000Z",
+        "diagnosedReason": "checkout_abandonment",
+        "recommendedAction": "send_email_reminder",
+        "actionTaken": "sent_email_reminder",
+        "actionDetail": "Hi Sneha, it looks like your order of ₹4430 was not completed. If you'd like to finish your purchase, please click the link below to complete payment. Thank you!",
+        "outcome": "paid",
+        "confidence": "high",
+        "recoveryProbability": 0.6,
+        "priority": "low",
+        "diagnosisRationale": "Transaction marked checkout_abandoned with no payment error; a reminder is the appropriate first step.",
+        "decisionAction": "send_email",
+        "policyOverridden": false,
+        "policyReason": "AI recommendation (send_email) accepted as-is.",
+        "respondedAt": "2026-06-25T20:03:00.000Z"
+      }
+    ],
+    "paymentAttempts": [
+      {
+        "id": "b8029945-4b77-4822-ad88-9edc4a373a93",
+        "recoveryAttemptNumber": 1,
+        "status": "captured",
+        "amount": 4430,
+        "createdAt": "2026-06-23T11:03:00.000Z",
+        "updatedAt": "2026-06-25T20:03:00.000Z"
+      }
+    ]
+  },
+  {
+    "id": "TXN-H0015",
+    "customerName": "Swati Bansal",
+    "amount": 5350,
+    "type": "invoice_overdue",
+    "trueFailureReason": "upi_failure",
+    "gatewayErrorHint": "UPI payment timed out — no PIN entered within the allotted window at the payer's app.",
+    "createdAt": "2026-06-17T08:09:00.000Z",
+    "status": "recovered",
+    "attempts": [
+      {
+        "attemptNumber": 1,
+        "timestamp": "2026-06-17T10:09:00.000Z",
+        "diagnosedReason": "upi_failure",
+        "recommendedAction": "send_sms_reminder",
+        "actionTaken": "sent_reminder",
+        "actionDetail": "We noticed your payment of ₹5350 didn't go through. Please try again or reach out if you need help.",
+        "outcome": "declined_again",
+        "confidence": "medium",
+        "recoveryProbability": 0.5,
+        "priority": "medium",
+        "diagnosisRationale": "Gateway error (UPI payment timed out — no PIN entered within the allotted window at the payer's app.) suggests upi_failure; a light-touch reminder was tried first.",
+        "decisionAction": "send_reminder",
+        "policyOverridden": false,
+        "policyReason": "AI recommendation (send_reminder) accepted as-is.",
+        "nextAttemptEligibleAt": "2026-06-18T10:09:00.000Z"
+      },
+      {
+        "attemptNumber": 2,
+        "timestamp": "2026-06-18T10:09:00.000Z",
+        "diagnosedReason": "upi_failure",
+        "recommendedAction": "retry_payment_same_method",
+        "actionTaken": "generated_payment_link",
+        "actionDetail": "Just a reminder — you can still complete your payment of ₹5350 securely here: https://rzp.io/rzp/DEMO14B",
+        "outcome": "paid",
+        "confidence": "high",
+        "recoveryProbability": 0.75,
+        "priority": "medium",
+        "diagnosisRationale": "First reminder did not convert; escalating to a real Payment Link on the second attempt.",
+        "decisionAction": "generate_payment_link",
+        "policyOverridden": false,
+        "policyReason": "AI recommendation (generate_payment_link) accepted as-is.",
+        "paymentLinkId": "plink_demo_TXN-0015_14b",
+        "paymentLinkUrl": "https://rzp.io/rzp/DEMO14B",
+        "respondedAt": "2026-06-18T18:09:00.000Z"
+      }
+    ],
+    "paymentAttempts": [
+      {
+        "id": "07f5a9fe-1197-474a-84ee-fa49803dc0f5",
+        "recoveryAttemptNumber": 2,
+        "status": "captured",
+        "amount": 5350,
+        "paymentLinkId": "plink_demo_TXN-0015_14b",
+        "method": "card",
+        "createdAt": "2026-06-18T10:09:00.000Z",
+        "updatedAt": "2026-06-18T18:09:00.000Z"
+      }
+    ]
+  },
+  {
+    "id": "TXN-H0016",
+    "customerName": "Manoj Pillai",
+    "amount": 6855,
+    "type": "checkout_abandoned",
+    "trueFailureReason": "upi_failure",
+    "gatewayErrorHint": "UPI payment timed out — no PIN entered within the allotted window at the payer's app.",
+    "createdAt": "2026-06-07T07:20:00.000Z",
+    "status": "unrecovered",
+    "attempts": [
+      {
+        "attemptNumber": 1,
+        "timestamp": "2026-06-07T09:20:00.000Z",
+        "diagnosedReason": "upi_failure",
+        "recommendedAction": "retry_payment_same_method",
+        "actionTaken": "generated_payment_link",
+        "actionDetail": "We're re-attempting your payment of ₹6855 (same method). Complete it securely here: https://rzp.io/rzp/DEMO15U",
+        "outcome": "declined_again",
+        "confidence": "medium",
+        "recoveryProbability": 0.4,
+        "priority": "medium",
+        "diagnosisRationale": "Gateway error (UPI payment timed out — no PIN entered within the allotted window at the payer's app.) suggests upi_failure.",
+        "decisionAction": "generate_payment_link",
+        "policyOverridden": false,
+        "policyReason": "AI recommendation (generate_payment_link) accepted as-is.",
+        "paymentLinkId": "plink_demo_TXN-0016_15u1",
+        "paymentLinkUrl": "https://rzp.io/rzp/DEMO15U",
+        "nextAttemptEligibleAt": "2026-06-08T09:20:00.000Z"
+      },
+      {
+        "attemptNumber": 2,
+        "timestamp": "2026-06-08T09:20:00.000Z",
+        "diagnosedReason": "upi_failure",
+        "recommendedAction": "retry_payment_alternate_method",
+        "actionTaken": "generated_payment_link",
+        "actionDetail": "Let's try a different payment method for your ₹6855 order: https://rzp.io/rzp/DEMO15U2",
+        "outcome": "declined_again",
+        "confidence": "medium",
+        "recoveryProbability": 0.3,
+        "priority": "high",
+        "diagnosisRationale": "First retry on the same method failed again; suggesting an alternate method.",
+        "decisionAction": "generate_payment_link",
+        "policyOverridden": false,
+        "policyReason": "AI recommendation (generate_payment_link) accepted as-is.",
+        "paymentLinkId": "plink_demo_TXN-0016_15u2",
+        "paymentLinkUrl": "https://rzp.io/rzp/DEMO15U2",
+        "nextAttemptEligibleAt": "2026-06-10T09:20:00.000Z"
+      },
+      {
+        "attemptNumber": 3,
+        "timestamp": "2026-06-10T09:20:00.000Z",
+        "diagnosedReason": "upi_failure",
+        "recommendedAction": "mark_unrecoverable",
+        "actionTaken": "stopped_by_policy",
+        "actionDetail": "Maximum automated recovery attempts reached; handing off to a human.",
+        "outcome": "no_response",
+        "confidence": "low",
+        "recoveryProbability": 0.1,
+        "priority": "high",
+        "diagnosisRationale": "Two attempts already failed with no response; recovery is unlikely to succeed further.",
+        "decisionAction": "stop",
+        "policyOverridden": false,
+        "policyReason": "AI recommendation (stop) accepted as-is."
+      }
+    ],
+    "paymentAttempts": [
+      {
+        "id": "dde476e7-721d-4ec5-a5dc-8818d972338b",
+        "recoveryAttemptNumber": 1,
+        "status": "failed",
+        "amount": 6855,
+        "paymentLinkId": "plink_demo_TXN-0016_15u1",
+        "failureReason": "upi_failure",
+        "createdAt": "2026-06-07T09:20:00.000Z",
+        "updatedAt": "2026-06-07T09:20:00.000Z"
+      },
+      {
+        "id": "b257163d-d41a-4d9b-9d17-362c9932d1b1",
+        "recoveryAttemptNumber": 2,
+        "status": "failed",
+        "amount": 6855,
+        "paymentLinkId": "plink_demo_TXN-0016_15u2",
+        "failureReason": "upi_failure",
+        "createdAt": "2026-06-08T09:20:00.000Z",
+        "updatedAt": "2026-06-08T09:20:00.000Z"
+      }
+    ]
+  },
+  {
+    "id": "TXN-H0017",
+    "customerName": "Ananya Desai",
+    "amount": 960,
+    "type": "payment_failed",
+    "trueFailureReason": "authentication_failure",
+    "gatewayErrorHint": "Payment failed — 3-D Secure / OTP authentication was not completed in time.",
+    "createdAt": "2026-06-27T06:01:00.000Z",
+    "status": "recovered",
+    "attempts": [
+      {
+        "attemptNumber": 1,
+        "timestamp": "2026-06-27T10:01:00.000Z",
+        "diagnosedReason": "authentication_failure",
+        "recommendedAction": "retry_payment_same_method",
+        "actionTaken": "generated_payment_link",
+        "actionDetail": "We're re-attempting your payment of ₹960 (same method). Complete it securely here: https://rzp.io/rzp/DEMO16",
+        "outcome": "paid",
+        "confidence": "high",
+        "recoveryProbability": 0.8,
+        "priority": "medium",
+        "diagnosisRationale": "Gateway error (Payment failed — 3-D Secure / OTP authentication was not completed in time.) clearly supports authentication_failure; a same-method retry is the appropriate next step.",
+        "decisionAction": "generate_payment_link",
+        "policyOverridden": false,
+        "policyReason": "AI recommendation (generate_payment_link) accepted as-is.",
+        "paymentLinkId": "plink_demo_TXN-0017_16",
+        "paymentLinkUrl": "https://rzp.io/rzp/DEMO16",
+        "respondedAt": "2026-07-08T07:01:00.000Z"
+      }
+    ],
+    "paymentAttempts": [
+      {
+        "id": "88fc1f4f-8da5-4ef5-9212-32c9b2901f59",
+        "recoveryAttemptNumber": 1,
+        "status": "captured",
+        "amount": 960,
+        "paymentLinkId": "plink_demo_TXN-0017_16",
+        "method": "upi",
+        "createdAt": "2026-06-27T10:01:00.000Z",
+        "updatedAt": "2026-07-08T07:01:00.000Z"
+      }
+    ]
+  },
+  {
+    "id": "TXN-H0018",
+    "customerName": "Ritu Chawla",
+    "amount": 10115,
+    "type": "checkout_abandoned",
+    "trueFailureReason": "checkout_abandonment",
+    "createdAt": "2026-06-22T06:07:00.000Z",
+    "status": "recovered",
+    "attempts": [
+      {
+        "attemptNumber": 1,
+        "timestamp": "2026-06-22T09:07:00.000Z",
+        "diagnosedReason": "checkout_abandonment",
+        "recommendedAction": "send_email_reminder",
+        "actionTaken": "sent_email_reminder",
+        "actionDetail": "Hi Ritu, it looks like your order of ₹10115 was not completed. If you'd like to finish your purchase, please click the link below to complete payment. Thank you!",
+        "outcome": "paid",
+        "confidence": "high",
+        "recoveryProbability": 0.6,
+        "priority": "low",
+        "diagnosisRationale": "Transaction marked checkout_abandoned with no payment error; a reminder is the appropriate first step.",
+        "decisionAction": "send_email",
+        "policyOverridden": false,
+        "policyReason": "AI recommendation (send_email) accepted as-is.",
+        "respondedAt": "2026-06-22T18:07:00.000Z"
+      }
+    ],
+    "paymentAttempts": [
+      {
+        "id": "ebf629b5-b7dd-46da-995e-197849027f88",
+        "recoveryAttemptNumber": 1,
+        "status": "captured",
+        "amount": 10115,
+        "createdAt": "2026-06-22T09:07:00.000Z",
+        "updatedAt": "2026-06-22T18:07:00.000Z"
+      }
+    ]
+  },
+  {
+    "id": "TXN-H0019",
+    "customerName": "Priyanka Nayak",
+    "amount": 2170,
+    "type": "invoice_overdue",
+    "trueFailureReason": "bank_decline",
+    "gatewayErrorHint": "Transaction declined by the issuing bank. No further reason code provided.",
+    "createdAt": "2026-06-17T06:13:00.000Z",
+    "status": "recovered",
+    "attempts": [
+      {
+        "attemptNumber": 1,
+        "timestamp": "2026-06-17T08:13:00.000Z",
+        "diagnosedReason": "bank_decline",
+        "recommendedAction": "send_sms_reminder",
+        "actionTaken": "sent_reminder",
+        "actionDetail": "We noticed your payment of ₹2170 didn't go through. Please try again or reach out if you need help.",
+        "outcome": "declined_again",
+        "confidence": "medium",
+        "recoveryProbability": 0.5,
+        "priority": "medium",
+        "diagnosisRationale": "Gateway error (Transaction declined by the issuing bank. No further reason code provided.) suggests bank_decline; a light-touch reminder was tried first.",
+        "decisionAction": "send_reminder",
+        "policyOverridden": false,
+        "policyReason": "AI recommendation (send_reminder) accepted as-is.",
+        "nextAttemptEligibleAt": "2026-06-18T08:13:00.000Z"
+      },
+      {
+        "attemptNumber": 2,
+        "timestamp": "2026-06-18T08:13:00.000Z",
+        "diagnosedReason": "bank_decline",
+        "recommendedAction": "retry_payment_same_method",
+        "actionTaken": "generated_payment_link",
+        "actionDetail": "Just a reminder — you can still complete your payment of ₹2170 securely here: https://rzp.io/rzp/DEMO18B",
+        "outcome": "paid",
+        "confidence": "high",
+        "recoveryProbability": 0.75,
+        "priority": "medium",
+        "diagnosisRationale": "First reminder did not convert; escalating to a real Payment Link on the second attempt.",
+        "decisionAction": "generate_payment_link",
+        "policyOverridden": false,
+        "policyReason": "AI recommendation (generate_payment_link) accepted as-is.",
+        "paymentLinkId": "plink_demo_TXN-0019_18b",
+        "paymentLinkUrl": "https://rzp.io/rzp/DEMO18B",
+        "respondedAt": "2026-06-25T15:13:00.000Z"
+      }
+    ],
+    "paymentAttempts": [
+      {
+        "id": "c53e83b4-c1fb-4ebb-a88a-d2deac27765a",
+        "recoveryAttemptNumber": 2,
+        "status": "captured",
+        "amount": 2170,
+        "paymentLinkId": "plink_demo_TXN-0019_18b",
+        "method": "card",
+        "createdAt": "2026-06-18T08:13:00.000Z",
+        "updatedAt": "2026-06-25T15:13:00.000Z"
+      }
+    ]
+  },
+  {
+    "id": "TXN-H0020",
+    "customerName": "Nikhil Agarwal",
+    "amount": 7525,
+    "type": "checkout_abandoned",
+    "trueFailureReason": "bank_decline",
+    "gatewayErrorHint": "Transaction declined by the issuing bank. No further reason code provided.",
+    "createdAt": "2026-06-06T05:24:00.000Z",
+    "status": "unrecovered",
+    "attempts": [
+      {
+        "attemptNumber": 1,
+        "timestamp": "2026-06-06T07:24:00.000Z",
+        "diagnosedReason": "bank_decline",
+        "recommendedAction": "retry_payment_same_method",
+        "actionTaken": "generated_payment_link",
+        "actionDetail": "We're re-attempting your payment of ₹7525 (same method). Complete it securely here: https://rzp.io/rzp/DEMO19U",
+        "outcome": "declined_again",
+        "confidence": "medium",
+        "recoveryProbability": 0.4,
+        "priority": "medium",
+        "diagnosisRationale": "Gateway error (Transaction declined by the issuing bank. No further reason code provided.) suggests bank_decline.",
+        "decisionAction": "generate_payment_link",
+        "policyOverridden": false,
+        "policyReason": "AI recommendation (generate_payment_link) accepted as-is.",
+        "paymentLinkId": "plink_demo_TXN-0020_19u1",
+        "paymentLinkUrl": "https://rzp.io/rzp/DEMO19U",
+        "nextAttemptEligibleAt": "2026-06-07T07:24:00.000Z"
+      },
+      {
+        "attemptNumber": 2,
+        "timestamp": "2026-06-07T07:24:00.000Z",
+        "diagnosedReason": "bank_decline",
+        "recommendedAction": "retry_payment_alternate_method",
+        "actionTaken": "generated_payment_link",
+        "actionDetail": "Let's try a different payment method for your ₹7525 order: https://rzp.io/rzp/DEMO19U2",
+        "outcome": "declined_again",
+        "confidence": "medium",
+        "recoveryProbability": 0.3,
+        "priority": "high",
+        "diagnosisRationale": "First retry on the same method failed again; suggesting an alternate method.",
+        "decisionAction": "generate_payment_link",
+        "policyOverridden": false,
+        "policyReason": "AI recommendation (generate_payment_link) accepted as-is.",
+        "paymentLinkId": "plink_demo_TXN-0020_19u2",
+        "paymentLinkUrl": "https://rzp.io/rzp/DEMO19U2",
+        "nextAttemptEligibleAt": "2026-06-09T07:24:00.000Z"
+      },
+      {
+        "attemptNumber": 3,
+        "timestamp": "2026-06-09T07:24:00.000Z",
+        "diagnosedReason": "bank_decline",
+        "recommendedAction": "mark_unrecoverable",
+        "actionTaken": "stopped_by_policy",
+        "actionDetail": "Maximum automated recovery attempts reached; handing off to a human.",
+        "outcome": "no_response",
+        "confidence": "low",
+        "recoveryProbability": 0.1,
+        "priority": "high",
+        "diagnosisRationale": "Two attempts already failed with no response; recovery is unlikely to succeed further.",
+        "decisionAction": "stop",
+        "policyOverridden": false,
+        "policyReason": "AI recommendation (stop) accepted as-is."
+      }
+    ],
+    "paymentAttempts": [
+      {
+        "id": "22dea591-ee07-493c-a655-aca08201a362",
+        "recoveryAttemptNumber": 1,
+        "status": "failed",
+        "amount": 7525,
+        "paymentLinkId": "plink_demo_TXN-0020_19u1",
+        "failureReason": "bank_decline",
+        "createdAt": "2026-06-06T07:24:00.000Z",
+        "updatedAt": "2026-06-06T07:24:00.000Z"
+      },
+      {
+        "id": "1ea322dd-f1da-4686-86a2-534d74f0bc40",
+        "recoveryAttemptNumber": 2,
+        "status": "failed",
+        "amount": 7525,
+        "paymentLinkId": "plink_demo_TXN-0020_19u2",
+        "failureReason": "bank_decline",
+        "createdAt": "2026-06-07T07:24:00.000Z",
+        "updatedAt": "2026-06-07T07:24:00.000Z"
+      }
+    ]
+  },
+  {
+    "id": "TXN-H0021",
+    "customerName": "Harsh Vora",
+    "amount": 1780,
+    "type": "payment_failed",
+    "trueFailureReason": "card_failure",
+    "gatewayErrorHint": "Card declined — issuer reports the card is blocked or restricted.",
+    "createdAt": "2026-06-25T04:05:00.000Z",
+    "status": "recovered",
+    "attempts": [
+      {
+        "attemptNumber": 1,
+        "timestamp": "2026-06-25T07:05:00.000Z",
+        "diagnosedReason": "card_failure",
+        "recommendedAction": "retry_payment_same_method",
+        "actionTaken": "generated_payment_link",
+        "actionDetail": "We're re-attempting your payment of ₹1780 (same method). Complete it securely here: https://rzp.io/rzp/DEMO20",
+        "outcome": "paid",
+        "confidence": "high",
+        "recoveryProbability": 0.8,
+        "priority": "medium",
+        "diagnosisRationale": "Gateway error (Card declined — issuer reports the card is blocked or restricted.) clearly supports card_failure; a same-method retry is the appropriate next step.",
+        "decisionAction": "generate_payment_link",
+        "policyOverridden": false,
+        "policyReason": "AI recommendation (generate_payment_link) accepted as-is.",
+        "paymentLinkId": "plink_demo_TXN-0021_20",
+        "paymentLinkUrl": "https://rzp.io/rzp/DEMO20",
+        "respondedAt": "2026-06-25T07:05:00.000Z"
+      }
+    ],
+    "paymentAttempts": [
+      {
+        "id": "82600c28-4bad-4103-b467-6bfb6df27bb8",
+        "recoveryAttemptNumber": 1,
+        "status": "captured",
+        "amount": 1780,
+        "paymentLinkId": "plink_demo_TXN-0021_20",
+        "method": "netbanking",
+        "createdAt": "2026-06-25T07:05:00.000Z",
+        "updatedAt": "2026-06-25T07:05:00.000Z"
+      }
+    ]
+  },
+  {
+    "id": "TXN-H0022",
+    "customerName": "Rajesh Kumar",
+    "amount": 2650,
+    "type": "checkout_abandoned",
+    "trueFailureReason": "checkout_abandonment",
+    "createdAt": "2026-06-19T04:11:00.000Z",
+    "status": "recovered",
+    "attempts": [
+      {
+        "attemptNumber": 1,
+        "timestamp": "2026-06-19T07:11:00.000Z",
+        "diagnosedReason": "checkout_abandonment",
+        "recommendedAction": "send_email_reminder",
+        "actionTaken": "sent_email_reminder",
+        "actionDetail": "Hi Rajesh, it looks like your order of ₹2650 was not completed. If you'd like to finish your purchase, please click the link below to complete payment. Thank you!",
+        "outcome": "paid",
+        "confidence": "high",
+        "recoveryProbability": 0.6,
+        "priority": "low",
+        "diagnosisRationale": "Transaction marked checkout_abandoned with no payment error; a reminder is the appropriate first step.",
+        "decisionAction": "send_email",
+        "policyOverridden": false,
+        "policyReason": "AI recommendation (send_email) accepted as-is.",
+        "respondedAt": "2026-06-22T22:11:00.000Z"
+      }
+    ],
+    "paymentAttempts": [
+      {
+        "id": "c13bcf00-4c36-472e-93ec-b139e332ea9f",
+        "recoveryAttemptNumber": 1,
+        "status": "captured",
+        "amount": 2650,
+        "createdAt": "2026-06-19T07:11:00.000Z",
+        "updatedAt": "2026-06-22T22:11:00.000Z"
+      }
+    ]
+  },
+  {
+    "id": "TXN-H0023",
+    "customerName": "Tanvi Shah",
+    "amount": 3255,
+    "type": "invoice_overdue",
+    "trueFailureReason": "insufficient_funds",
+    "gatewayErrorHint": "Auto-debit failed — issuing bank reported insufficient funds at time of debit.",
+    "createdAt": "2026-07-04T07:57:00.000Z",
+    "status": "recovered",
+    "attempts": [
+      {
+        "attemptNumber": 1,
+        "timestamp": "2026-07-04T09:57:00.000Z",
+        "diagnosedReason": "insufficient_funds",
+        "recommendedAction": "send_sms_reminder",
+        "actionTaken": "sent_reminder",
+        "actionDetail": "We noticed your payment of ₹3255 didn't go through. Please try again or reach out if you need help.",
+        "outcome": "declined_again",
+        "confidence": "medium",
+        "recoveryProbability": 0.5,
+        "priority": "medium",
+        "diagnosisRationale": "Gateway error (Auto-debit failed — issuing bank reported insufficient funds at time of debit.) suggests insufficient_funds; a light-touch reminder was tried first.",
+        "decisionAction": "send_reminder",
+        "policyOverridden": false,
+        "policyReason": "AI recommendation (send_reminder) accepted as-is.",
+        "nextAttemptEligibleAt": "2026-07-05T09:57:00.000Z"
+      },
+      {
+        "attemptNumber": 2,
+        "timestamp": "2026-07-05T09:57:00.000Z",
+        "diagnosedReason": "insufficient_funds",
+        "recommendedAction": "retry_payment_same_method",
+        "actionTaken": "generated_payment_link",
+        "actionDetail": "Just a reminder — you can still complete your payment of ₹3255 securely here: https://rzp.io/rzp/DEMO22B",
+        "outcome": "paid",
+        "confidence": "high",
+        "recoveryProbability": 0.75,
+        "priority": "medium",
+        "diagnosisRationale": "First reminder did not convert; escalating to a real Payment Link on the second attempt.",
+        "decisionAction": "generate_payment_link",
+        "policyOverridden": false,
+        "policyReason": "AI recommendation (generate_payment_link) accepted as-is.",
+        "paymentLinkId": "plink_demo_TXN-0023_22b",
+        "paymentLinkUrl": "https://rzp.io/rzp/DEMO22B",
+        "respondedAt": "2026-07-06T07:57:00.000Z"
+      }
+    ],
+    "paymentAttempts": [
+      {
+        "id": "392747ca-9f0d-493b-ac01-9297c657bd93",
+        "recoveryAttemptNumber": 2,
+        "status": "captured",
+        "amount": 3255,
+        "paymentLinkId": "plink_demo_TXN-0023_22b",
+        "method": "card",
+        "createdAt": "2026-07-05T09:57:00.000Z",
+        "updatedAt": "2026-07-06T07:57:00.000Z"
+      }
+    ]
+  },
+  {
+    "id": "TXN-H0024",
+    "customerName": "Aditya Kapoor",
+    "amount": 4210,
+    "type": "checkout_abandoned",
+    "trueFailureReason": "insufficient_funds",
+    "gatewayErrorHint": "Bank declined the transaction: insufficient balance in account.",
+    "createdAt": "2026-06-03T08:48:00.000Z",
+    "status": "unrecovered",
+    "attempts": [
+      {
+        "attemptNumber": 1,
+        "timestamp": "2026-06-03T10:48:00.000Z",
+        "diagnosedReason": "insufficient_funds",
+        "recommendedAction": "retry_payment_same_method",
+        "actionTaken": "generated_payment_link",
+        "actionDetail": "We're re-attempting your payment of ₹4210 (same method). Complete it securely here: https://rzp.io/rzp/DEMO23U",
+        "outcome": "declined_again",
+        "confidence": "medium",
+        "recoveryProbability": 0.4,
+        "priority": "medium",
+        "diagnosisRationale": "Gateway error (Bank declined the transaction: insufficient balance in account.) suggests insufficient_funds.",
+        "decisionAction": "generate_payment_link",
+        "policyOverridden": false,
+        "policyReason": "AI recommendation (generate_payment_link) accepted as-is.",
+        "paymentLinkId": "plink_demo_TXN-0024_23u1",
+        "paymentLinkUrl": "https://rzp.io/rzp/DEMO23U",
+        "nextAttemptEligibleAt": "2026-06-04T10:48:00.000Z"
+      },
+      {
+        "attemptNumber": 2,
+        "timestamp": "2026-06-04T10:48:00.000Z",
+        "diagnosedReason": "insufficient_funds",
+        "recommendedAction": "retry_payment_alternate_method",
+        "actionTaken": "generated_payment_link",
+        "actionDetail": "Let's try a different payment method for your ₹4210 order: https://rzp.io/rzp/DEMO23U2",
+        "outcome": "declined_again",
+        "confidence": "medium",
+        "recoveryProbability": 0.3,
+        "priority": "high",
+        "diagnosisRationale": "First retry on the same method failed again; suggesting an alternate method.",
+        "decisionAction": "generate_payment_link",
+        "policyOverridden": false,
+        "policyReason": "AI recommendation (generate_payment_link) accepted as-is.",
+        "paymentLinkId": "plink_demo_TXN-0024_23u2",
+        "paymentLinkUrl": "https://rzp.io/rzp/DEMO23U2",
+        "nextAttemptEligibleAt": "2026-06-06T10:48:00.000Z"
+      },
+      {
+        "attemptNumber": 3,
+        "timestamp": "2026-06-06T10:48:00.000Z",
+        "diagnosedReason": "insufficient_funds",
+        "recommendedAction": "mark_unrecoverable",
+        "actionTaken": "stopped_by_policy",
+        "actionDetail": "Maximum automated recovery attempts reached; handing off to a human.",
+        "outcome": "no_response",
+        "confidence": "low",
+        "recoveryProbability": 0.1,
+        "priority": "high",
+        "diagnosisRationale": "Two attempts already failed with no response; recovery is unlikely to succeed further.",
+        "decisionAction": "stop",
+        "policyOverridden": false,
+        "policyReason": "AI recommendation (stop) accepted as-is."
+      }
+    ],
+    "paymentAttempts": [
+      {
+        "id": "68c0bc6d-2ada-4ae0-9655-a9fbdb5e869c",
+        "recoveryAttemptNumber": 1,
+        "status": "failed",
+        "amount": 4210,
+        "paymentLinkId": "plink_demo_TXN-0024_23u1",
+        "failureReason": "insufficient_funds",
+        "createdAt": "2026-06-03T10:48:00.000Z",
+        "updatedAt": "2026-06-03T10:48:00.000Z"
+      },
+      {
+        "id": "c422885e-7990-484c-99be-3333d7eb634d",
+        "recoveryAttemptNumber": 2,
+        "status": "failed",
+        "amount": 4210,
+        "paymentLinkId": "plink_demo_TXN-0024_23u2",
+        "failureReason": "insufficient_funds",
+        "createdAt": "2026-06-04T10:48:00.000Z",
+        "updatedAt": "2026-06-04T10:48:00.000Z"
+      }
+    ]
+  },
+  {
+    "id": "TXN-H0025",
+    "customerName": "Neha Gupta",
+    "amount": 5515,
+    "type": "payment_failed",
+    "trueFailureReason": "network_failure",
+    "gatewayErrorHint": "Gateway timeout — no response received from the bank within the expected window.",
+    "createdAt": "2026-06-22T08:09:00.000Z",
+    "status": "recovered",
+    "attempts": [
+      {
+        "attemptNumber": 1,
+        "timestamp": "2026-06-22T12:09:00.000Z",
+        "diagnosedReason": "network_failure",
+        "recommendedAction": "retry_payment_same_method",
+        "actionTaken": "generated_payment_link",
+        "actionDetail": "We're re-attempting your payment of ₹5515 (same method). Complete it securely here: https://rzp.io/rzp/DEMO24",
+        "outcome": "paid",
+        "confidence": "high",
+        "recoveryProbability": 0.8,
+        "priority": "medium",
+        "diagnosisRationale": "Gateway error (Gateway timeout — no response received from the bank within the expected window.) clearly supports network_failure; a same-method retry is the appropriate next step.",
+        "decisionAction": "generate_payment_link",
+        "policyOverridden": false,
+        "policyReason": "AI recommendation (generate_payment_link) accepted as-is.",
+        "paymentLinkId": "plink_demo_TXN-0025_24",
+        "paymentLinkUrl": "https://rzp.io/rzp/DEMO24",
+        "respondedAt": "2026-07-06T02:09:00.000Z"
+      }
+    ],
+    "paymentAttempts": [
+      {
+        "id": "957a7b0a-a840-488c-b3fa-7df1b3aa5c7b",
+        "recoveryAttemptNumber": 1,
+        "status": "captured",
+        "amount": 5515,
+        "paymentLinkId": "plink_demo_TXN-0025_24",
+        "method": "card",
+        "createdAt": "2026-06-22T12:09:00.000Z",
+        "updatedAt": "2026-07-06T02:09:00.000Z"
+      }
+    ]
+  },
+  {
+    "id": "TXN-H0026",
+    "customerName": "Divya Menon",
+    "amount": 7020,
+    "type": "checkout_abandoned",
+    "trueFailureReason": "checkout_abandonment",
+    "createdAt": "2026-07-12T06:50:00.000Z",
+    "status": "recovered",
+    "attempts": [
+      {
+        "attemptNumber": 1,
+        "timestamp": "2026-07-12T09:50:00.000Z",
+        "diagnosedReason": "checkout_abandonment",
+        "recommendedAction": "send_email_reminder",
+        "actionTaken": "sent_email_reminder",
+        "actionDetail": "Hi Divya, it looks like your order of ₹7020 was not completed. If you'd like to finish your purchase, please click the link below to complete payment. Thank you!",
+        "outcome": "paid",
+        "confidence": "high",
+        "recoveryProbability": 0.6,
+        "priority": "low",
+        "diagnosisRationale": "Transaction marked checkout_abandoned with no payment error; a reminder is the appropriate first step.",
+        "decisionAction": "send_email",
+        "policyOverridden": false,
+        "policyReason": "AI recommendation (send_email) accepted as-is.",
+        "respondedAt": "2026-07-12T21:50:00.000Z"
+      }
+    ],
+    "paymentAttempts": [
+      {
+        "id": "0d6b955d-ba98-4d90-afa1-f114e998c761",
+        "recoveryAttemptNumber": 1,
+        "status": "captured",
+        "amount": 7020,
+        "createdAt": "2026-07-12T09:50:00.000Z",
+        "updatedAt": "2026-07-12T21:50:00.000Z"
+      }
+    ]
+  },
+  {
+    "id": "TXN-H0027",
+    "customerName": "Varun Kulkarni",
+    "amount": 1125,
+    "type": "subscription_failed",
+    "trueFailureReason": "card_failure",
+    "gatewayErrorHint": "Card declined — issuer reports the card is blocked or restricted.",
+    "createdAt": "2026-06-23T04:11:00.000Z",
+    "status": "recovered",
+    "attempts": [
+      {
+        "attemptNumber": 1,
+        "timestamp": "2026-06-23T08:11:00.000Z",
+        "diagnosedReason": "card_failure",
+        "recommendedAction": "retry_payment_same_method",
+        "actionTaken": "generated_payment_link",
+        "actionDetail": "We're re-attempting your payment of ₹1125 (same method). Complete it securely here: https://rzp.io/rzp/DEMO26",
+        "outcome": "paid",
+        "confidence": "high",
+        "recoveryProbability": 0.8,
+        "priority": "medium",
+        "diagnosisRationale": "Gateway error (Card declined — issuer reports the card is blocked or restricted.) clearly supports card_failure; a same-method retry is the appropriate next step.",
+        "decisionAction": "generate_payment_link",
+        "policyOverridden": false,
+        "policyReason": "AI recommendation (generate_payment_link) accepted as-is.",
+        "paymentLinkId": "plink_demo_TXN-0027_26",
+        "paymentLinkUrl": "https://rzp.io/rzp/DEMO26",
+        "respondedAt": "2026-06-25T11:11:00.000Z"
+      }
+    ],
+    "paymentAttempts": [
+      {
+        "id": "fdc2b748-7724-4931-a3c5-c04afc37355a",
+        "recoveryAttemptNumber": 1,
+        "status": "captured",
+        "amount": 1125,
+        "paymentLinkId": "plink_demo_TXN-0027_26",
+        "method": "netbanking",
+        "createdAt": "2026-06-23T08:11:00.000Z",
+        "updatedAt": "2026-06-25T11:11:00.000Z"
+      }
+    ]
+  },
+  {
+    "id": "TXN-H0028",
+    "customerName": "Meera Krishnan",
+    "amount": 10280,
+    "type": "checkout_abandoned",
+    "trueFailureReason": "checkout_abandonment",
+    "createdAt": "2026-07-13T08:52:00.000Z",
+    "status": "recovered",
+    "attempts": [
+      {
+        "attemptNumber": 1,
+        "timestamp": "2026-07-13T11:52:00.000Z",
+        "diagnosedReason": "checkout_abandonment",
+        "recommendedAction": "send_email_reminder",
+        "actionTaken": "sent_email_reminder",
+        "actionDetail": "Hi Meera, it looks like your order of ₹10280 was not completed. If you'd like to finish your purchase, please click the link below to complete payment. Thank you!",
+        "outcome": "paid",
+        "confidence": "high",
+        "recoveryProbability": 0.6,
+        "priority": "low",
+        "diagnosisRationale": "Transaction marked checkout_abandoned with no payment error; a reminder is the appropriate first step.",
+        "decisionAction": "send_email",
+        "policyOverridden": false,
+        "policyReason": "AI recommendation (send_email) accepted as-is.",
+        "respondedAt": "2026-07-13T17:52:00.000Z"
+      }
+    ],
+    "paymentAttempts": [
+      {
+        "id": "dc8f5b10-a411-45aa-a18f-166c9e41412a",
+        "recoveryAttemptNumber": 1,
+        "status": "captured",
+        "amount": 10280,
+        "createdAt": "2026-07-13T11:52:00.000Z",
+        "updatedAt": "2026-07-13T17:52:00.000Z"
+      }
+    ]
+  }
+]

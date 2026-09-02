@@ -130,6 +130,7 @@ export type EscalationReason =
   | "duplicate_successful_payments"
   | "suspected_fraud"
   | "high_value_transaction"
+  | "unusual_amount_spike" // amount is many times this specific customer's own historical average - see lib/recovery-decision-engine.ts
   | "low_ai_confidence"
   | "max_attempts_reached"
   | "customer_requested_human"
@@ -142,6 +143,7 @@ export const ESCALATION_REASONS: EscalationReason[] = [
   "duplicate_successful_payments",
   "suspected_fraud",
   "high_value_transaction",
+  "unusual_amount_spike",
   "low_ai_confidence",
   "max_attempts_reached",
   "customer_requested_human",

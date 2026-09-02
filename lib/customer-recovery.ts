@@ -28,6 +28,31 @@ export function customerIdentityKey(
   return email ? `${name}::${email}` : name;
 }
 
+/**
+ * Each customer's average transaction amount across a given set of PAST
+ * transactions only - the caller passes ONLY already-resolved history (e.g.
+ * lib/customer-history-store.ts), never the transaction currently being
+ * diagnosed, so an anomalous current amount can never dilute its own
+ * baseline. Feeds the "unusual_amount_spike" rule in
+ * lib/recovery-decision-engine.ts - a customer with no history yet simply
+ * has no entry here, and that rule correctly skips them rather than guessing.
+ */
+export function buildAveragePastAmountByCustomer(pastTransactions: Transaction[]): Map<string, number> {
+  const totals = new Map<string, { sum: number; count: number }>();
+  for (const t of pastTransactions) {
+    const key = customerIdentityKey(t);
+    const entry = totals.get(key) ?? { sum: 0, count: 0 };
+    entry.sum += t.amount;
+    entry.count += 1;
+    totals.set(key, entry);
+  }
+  const result = new Map<string, number>();
+  for (const [key, { sum, count }] of totals) {
+    result.set(key, sum / count);
+  }
+  return result;
+}
+
 function average(values: number[]): number | null {
   return values.length > 0 ? values.reduce((sum, v) => sum + v, 0) / values.length : null;
 }

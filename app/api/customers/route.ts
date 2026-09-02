@@ -1,11 +1,15 @@
 import { NextResponse } from "next/server";
 import { buildCustomerRecoveryProfiles } from "@/lib/customer-recovery";
+import { readCustomerHistoryTransactions } from "@/lib/customer-history-store";
 import { readTransactions } from "@/lib/transactions-store";
 
 export async function GET() {
   try {
-    const transactions = await readTransactions();
-    const customers = buildCustomerRecoveryProfiles(transactions);
+    const [transactions, history] = await Promise.all([
+      readTransactions(),
+      readCustomerHistoryTransactions(),
+    ]);
+    const customers = buildCustomerRecoveryProfiles([...history, ...transactions]);
     return NextResponse.json({ customers });
   } catch (error) {
     return NextResponse.json(

@@ -7,9 +7,38 @@
     "trueFailureReason": "network_failure",
     "gatewayErrorHint": "Gateway timeout — no response received from the bank within the expected window.",
     "createdAt": "2026-08-10T03:26:00.000Z",
-    "status": "pending",
-    "attempts": [],
-    "paymentAttempts": []
+    "status": "recovered",
+    "attempts": [
+      {
+        "attemptNumber": 1,
+        "timestamp": "2026-08-31T19:09:51.967Z",
+        "diagnosedReason": "network_failure",
+        "recommendedAction": "retry_payment_same_method",
+        "actionTaken": "generated_payment_link",
+        "actionDetail": "We're re-attempting your payment of ₹2350 (same method). Complete it securely here: https://rzp.io/rzp/VlrJXNOM",
+        "outcome": "paid",
+        "confidence": "high",
+        "recoveryProbability": 0.8,
+        "priority": "medium",
+        "diagnosisRationale": "Gateway timeout indicates a transient network issue, so retrying the same payment method is the most probable way to recover.",
+        "decisionAction": "generate_payment_link",
+        "policyOverridden": false,
+        "policyReason": "AI recommendation (generate_payment_link) accepted as-is.",
+        "paymentLinkId": "plink_TWUGiszNYVUMMs",
+        "paymentLinkUrl": "https://rzp.io/rzp/VlrJXNOM"
+      }
+    ],
+    "paymentAttempts": [
+      {
+        "id": "21771f68-4054-4083-b01f-874a2da1af43",
+        "recoveryAttemptNumber": 1,
+        "status": "captured",
+        "amount": 2350,
+        "paymentLinkId": "plink_TWUGiszNYVUMMs",
+        "createdAt": "2026-08-31T19:09:51.967Z",
+        "updatedAt": "2026-08-31T19:09:51.967Z"
+      }
+    ]
   },
   {
     "id": "TXN-0002",
@@ -19,10 +48,28 @@
     "trueFailureReason": "insufficient_funds",
     "gatewayErrorHint": "Declined by issuing bank — reason code 51 (insufficient funds).",
     "createdAt": "2026-08-10T08:25:00.000Z",
-    "status": "pending",
-    "attempts": [],
+    "status": "waiting_for_response",
+    "attempts": [
+      {
+        "attemptNumber": 1,
+        "timestamp": "2026-08-31T19:09:52.339Z",
+        "diagnosedReason": "insufficient_funds",
+        "recommendedAction": "send_email_reminder",
+        "actionTaken": "sent_email_reminder",
+        "actionDetail": "Hello Abhishek, we were unable to process your subscription payment due to insufficient funds. Please ensure your account has sufficient balance and try again, or let us know if you need assistance. (real email sent to REPLACE_WITH_YOUR_EMAIL@example.com)",
+        "outcome": "awaiting_response",
+        "confidence": "high",
+        "recoveryProbability": 0.4,
+        "priority": "medium",
+        "diagnosisRationale": "Gateway returned explicit insufficient funds reason code 51, indicating a bank decline; high confidence in root cause. Recovery possible if user tops up, moderate likelihood.",
+        "decisionAction": "send_email",
+        "policyOverridden": false,
+        "policyReason": "AI recommendation (send_email) accepted as-is."
+      }
+    ],
     "customerEmail": "REPLACE_WITH_YOUR_EMAIL@example.com",
-    "paymentAttempts": []
+    "paymentAttempts": [],
+    "pendingResponseToken": "c3a7357b-1c33-4287-ae7b-d7bade7e5dbe"
   },
   {
     "id": "TXN-0003",
@@ -32,9 +79,41 @@
     "trueFailureReason": "insufficient_funds",
     "gatewayErrorHint": "Bank declined the transaction: insufficient balance in account.",
     "createdAt": "2026-08-11T00:25:00.000Z",
-    "status": "pending",
-    "attempts": [],
-    "paymentAttempts": []
+    "status": "in_progress",
+    "attempts": [
+      {
+        "attemptNumber": 1,
+        "timestamp": "2026-08-31T19:09:51.479Z",
+        "diagnosedReason": "insufficient_funds",
+        "recommendedAction": "retry_payment_alternate_method",
+        "actionTaken": "generated_payment_link",
+        "actionDetail": "We're re-attempting your payment of ₹7950 (alternate method). Complete it securely here: https://rzp.io/rzp/SybbRWG",
+        "outcome": "no_response",
+        "confidence": "high",
+        "recoveryProbability": 0.4,
+        "priority": "medium",
+        "diagnosisRationale": "Gateway error explicitly states insufficient balance, giving high confidence in insufficiency as root cause. Offering an alternate payment method provides the best chance of success.",
+        "decisionAction": "generate_payment_link",
+        "policyOverridden": false,
+        "policyReason": "AI recommendation (generate_payment_link) accepted as-is.",
+        "paymentLinkId": "plink_TWUGiN2Xvb5RBb",
+        "paymentLinkUrl": "https://rzp.io/rzp/SybbRWG",
+        "nextAttemptEligibleAt": "2026-09-02T19:09:51.479Z"
+      }
+    ],
+    "paymentAttempts": [
+      {
+        "id": "2026c738-1b85-4b4a-912d-f2b0c87f126a",
+        "recoveryAttemptNumber": 1,
+        "status": "failed",
+        "amount": 7950,
+        "paymentLinkId": "plink_TWUGiN2Xvb5RBb",
+        "createdAt": "2026-08-31T19:09:51.479Z",
+        "updatedAt": "2026-08-31T19:09:51.479Z",
+        "failureReason": "insufficient_funds"
+      }
+    ],
+    "nextEligibleAttemptDate": "2026-09-02T19:09:51.479Z"
   },
   {
     "id": "TXN-0004",
@@ -44,10 +123,40 @@
     "trueFailureReason": "card_failure",
     "gatewayErrorHint": "Card declined — issuer reports the card has expired.",
     "createdAt": "2026-08-11T16:02:00.000Z",
-    "status": "pending",
-    "attempts": [],
+    "status": "waiting_for_response",
+    "attempts": [
+      {
+        "attemptNumber": 1,
+        "timestamp": "2026-08-31T19:09:52.297Z",
+        "diagnosedReason": "card_failure",
+        "recommendedAction": "retry_payment_alternate_method",
+        "actionTaken": "generated_payment_link",
+        "actionDetail": "We're re-attempting your payment of ₹9200 (alternate method). Complete it securely here: https://rzp.io/rzp/9klfY8Ao (real email sent to REPLACE_WITH_YOUR_EMAIL@example.com)",
+        "outcome": "awaiting_response",
+        "confidence": "high",
+        "recoveryProbability": 0.2,
+        "priority": "high",
+        "diagnosisRationale": "The gateway explicitly states the issuer declined the card because it has expired, which directly points to card_failure with high confidence. Given the lack of prior successful attempts and the nature of the issue, recovery hinges on the customer providing an alternate payment method.",
+        "decisionAction": "generate_payment_link",
+        "policyOverridden": false,
+        "policyReason": "AI recommendation (generate_payment_link) accepted as-is.",
+        "paymentLinkId": "plink_TWUGiT8wouiRZG",
+        "paymentLinkUrl": "https://rzp.io/rzp/9klfY8Ao"
+      }
+    ],
     "customerEmail": "REPLACE_WITH_YOUR_EMAIL@example.com",
-    "paymentAttempts": []
+    "paymentAttempts": [
+      {
+        "id": "459888e2-f9e8-4c82-bf2c-79e1504a0774",
+        "recoveryAttemptNumber": 1,
+        "status": "created",
+        "amount": 9200,
+        "paymentLinkId": "plink_TWUGiT8wouiRZG",
+        "createdAt": "2026-08-31T19:09:51.585Z",
+        "updatedAt": "2026-08-31T19:09:51.585Z"
+      }
+    ],
+    "pendingResponseToken": "ce593c97-a0bf-407a-b135-64dea7be4377"
   },
   {
     "id": "TXN-0005",
@@ -57,8 +166,28 @@
     "trueFailureReason": "card_failure",
     "gatewayErrorHint": "Card declined by issuer — reason code 05 (do not honor).",
     "createdAt": "2026-08-12T05:46:00.000Z",
-    "status": "pending",
-    "attempts": [],
+    "status": "escalated",
+    "attempts": [
+      {
+        "attemptNumber": 1,
+        "timestamp": "2026-08-31T19:09:51.679Z",
+        "diagnosedReason": "bank_decline",
+        "recommendedAction": "retry_payment_same_method",
+        "actionTaken": "escalated_to_human",
+        "actionDetail": "Order amount ₹13550 is at or above the configured high-value threshold (₹10000); a human reviews this before automation acts.",
+        "outcome": "no_response",
+        "confidence": "high",
+        "recoveryProbability": 0.35,
+        "priority": "medium",
+        "diagnosisRationale": "Gateway returned reason code 05 (do not honor), indicating a bank decline, so root cause is bank_decline with high confidence.",
+        "decisionAction": "escalate_to_human",
+        "policyOverridden": true,
+        "policyReason": "Order amount ₹13550 is at or above the configured high-value threshold (₹10000); a human reviews this before automation acts.",
+        "escalationReasons": [
+          "high_value_transaction"
+        ]
+      }
+    ],
     "paymentAttempts": []
   },
   {
@@ -69,9 +198,38 @@
     "trueFailureReason": "card_failure",
     "gatewayErrorHint": "Card declined — issuer reports the card is blocked or restricted.",
     "createdAt": "2026-08-13T01:44:00.000Z",
-    "status": "pending",
-    "attempts": [],
-    "paymentAttempts": []
+    "status": "recovered",
+    "attempts": [
+      {
+        "attemptNumber": 1,
+        "timestamp": "2026-08-31T19:10:17.724Z",
+        "diagnosedReason": "card_failure",
+        "recommendedAction": "retry_payment_alternate_method",
+        "actionTaken": "generated_payment_link",
+        "actionDetail": "We're re-attempting your payment of ₹850 (alternate method). Complete it securely here: https://rzp.io/rzp/36H4bnW",
+        "outcome": "paid",
+        "confidence": "high",
+        "recoveryProbability": 0.3,
+        "priority": "high",
+        "diagnosisRationale": "The gateway reports the card is blocked or restricted, indicating a card failure. A high confidence in this root cause supports an attempt to retry with a different payment method.",
+        "decisionAction": "generate_payment_link",
+        "policyOverridden": false,
+        "policyReason": "AI recommendation (generate_payment_link) accepted as-is.",
+        "paymentLinkId": "plink_TWUHB20Vf2vHi7",
+        "paymentLinkUrl": "https://rzp.io/rzp/36H4bnW"
+      }
+    ],
+    "paymentAttempts": [
+      {
+        "id": "b96e674d-ccff-4e57-9a98-7d5636ee43b3",
+        "recoveryAttemptNumber": 1,
+        "status": "captured",
+        "amount": 850,
+        "paymentLinkId": "plink_TWUHB20Vf2vHi7",
+        "createdAt": "2026-08-31T19:10:17.724Z",
+        "updatedAt": "2026-08-31T19:10:17.724Z"
+      }
+    ]
   },
   {
     "id": "TXN-0007",
@@ -81,9 +239,38 @@
     "trueFailureReason": "bank_decline",
     "gatewayErrorHint": "Transaction declined by the issuing bank. No further reason code provided.",
     "createdAt": "2026-08-13T15:35:00.000Z",
-    "status": "pending",
-    "attempts": [],
-    "paymentAttempts": []
+    "status": "in_progress",
+    "attempts": [
+      {
+        "attemptNumber": 1,
+        "timestamp": "2026-08-31T19:10:36.396Z",
+        "diagnosedReason": "bank_decline",
+        "recommendedAction": "send_email_reminder",
+        "actionTaken": "sent_email_reminder",
+        "actionDetail": "Hi Pooja, your payment of ₹2050 was declined by the bank. Please try again or let us know if you need assistance.",
+        "outcome": "declined_again",
+        "confidence": "high",
+        "recoveryProbability": 0.5,
+        "priority": "medium",
+        "diagnosisRationale": "Gateway error indicates a bank decline; no prior successes, so a gentle reminder is likely to prompt a retry.",
+        "decisionAction": "send_email",
+        "policyOverridden": false,
+        "policyReason": "AI recommendation (send_email) accepted as-is.",
+        "nextAttemptEligibleAt": "2026-09-01T07:10:36.396Z"
+      }
+    ],
+    "paymentAttempts": [
+      {
+        "id": "a43634f0-38b2-4bf8-a9a9-bf29a3c0a991",
+        "recoveryAttemptNumber": 1,
+        "status": "failed",
+        "amount": 2050,
+        "failureReason": "bank_decline",
+        "createdAt": "2026-08-31T19:10:36.396Z",
+        "updatedAt": "2026-08-31T19:10:36.396Z"
+      }
+    ],
+    "nextEligibleAttemptDate": "2026-09-01T07:10:36.396Z"
   },
   {
     "id": "TXN-0008",
@@ -92,10 +279,28 @@
     "type": "checkout_abandoned",
     "trueFailureReason": "checkout_abandonment",
     "createdAt": "2026-08-15T23:50:00.000Z",
-    "status": "pending",
-    "attempts": [],
+    "status": "waiting_for_response",
+    "attempts": [
+      {
+        "attemptNumber": 1,
+        "timestamp": "2026-08-31T19:10:02.212Z",
+        "diagnosedReason": "checkout_abandonment",
+        "recommendedAction": "send_sms_reminder",
+        "actionTaken": "sent_reminder",
+        "actionDetail": "Hi Ishita, we noticed you started checkout but didn’t finish. Please complete your payment of ₹5300 to secure your purchase. Let us know if you need help. (real email sent to REPLACE_WITH_YOUR_EMAIL@example.com)",
+        "outcome": "awaiting_response",
+        "confidence": "high",
+        "recoveryProbability": 0.6,
+        "priority": "medium",
+        "diagnosisRationale": "The transaction type indicates checkout abandonment with no failure details, so the customer likely didn't complete the payment. High confidence in abandonment as the cause.",
+        "decisionAction": "send_reminder",
+        "policyOverridden": false,
+        "policyReason": "AI recommendation (send_reminder) accepted as-is."
+      }
+    ],
     "customerEmail": "REPLACE_WITH_YOUR_EMAIL@example.com",
-    "paymentAttempts": []
+    "paymentAttempts": [],
+    "pendingResponseToken": "4f786e07-88c2-47d2-87a4-3b68bce4282b"
   },
   {
     "id": "TXN-0009",
@@ -105,9 +310,38 @@
     "trueFailureReason": "insufficient_funds",
     "gatewayErrorHint": "Declined by issuing bank — reason code 51 (insufficient funds).",
     "createdAt": "2026-08-16T11:46:00.000Z",
-    "status": "pending",
-    "attempts": [],
-    "paymentAttempts": []
+    "status": "recovered",
+    "attempts": [
+      {
+        "attemptNumber": 1,
+        "timestamp": "2026-08-31T19:11:09.313Z",
+        "diagnosedReason": "insufficient_funds",
+        "recommendedAction": "retry_payment_alternate_method",
+        "actionTaken": "generated_payment_link",
+        "actionDetail": "We're re-attempting your payment of ₹9400 (alternate method). Complete it securely here: https://rzp.io/rzp/wcvvmD7",
+        "outcome": "paid",
+        "confidence": "high",
+        "recoveryProbability": 0.4,
+        "priority": "high",
+        "diagnosisRationale": "The gateway explicitly returned reason code 51 for insufficient funds, indicating the current card balance is inadequate; retrying with an alternate payment method offers the best chance of success.",
+        "decisionAction": "generate_payment_link",
+        "policyOverridden": false,
+        "policyReason": "AI recommendation (generate_payment_link) accepted as-is.",
+        "paymentLinkId": "plink_TWUI5L1fadwrMl",
+        "paymentLinkUrl": "https://rzp.io/rzp/wcvvmD7"
+      }
+    ],
+    "paymentAttempts": [
+      {
+        "id": "d8d3e072-4936-443b-823a-b11afd150d45",
+        "recoveryAttemptNumber": 1,
+        "status": "captured",
+        "amount": 9400,
+        "paymentLinkId": "plink_TWUI5L1fadwrMl",
+        "createdAt": "2026-08-31T19:11:09.312Z",
+        "updatedAt": "2026-08-31T19:11:09.313Z"
+      }
+    ]
   },
   {
     "id": "TXN-0010",
@@ -117,9 +351,38 @@
     "trueFailureReason": "bank_decline",
     "gatewayErrorHint": "Transaction declined by the issuing bank. No further reason code provided.",
     "createdAt": "2026-08-16T18:05:00.000Z",
-    "status": "pending",
-    "attempts": [],
-    "paymentAttempts": []
+    "status": "in_progress",
+    "attempts": [
+      {
+        "attemptNumber": 1,
+        "timestamp": "2026-08-31T19:11:13.962Z",
+        "diagnosedReason": "bank_decline",
+        "recommendedAction": "send_sms_reminder",
+        "actionTaken": "sent_reminder",
+        "actionDetail": "Hi Sanya, we noticed your payment was declined. Please try again or use a different payment method – let us know if you need assistance.",
+        "outcome": "no_response",
+        "confidence": "high",
+        "recoveryProbability": 0.4,
+        "priority": "low",
+        "diagnosisRationale": "Gateway shows a clear decline by the issuing bank; no prior failures exist, so the issue is likely a bank-side rejection. This warrants a reminder to prompt the customer to retry or switch payment methods.",
+        "decisionAction": "send_reminder",
+        "policyOverridden": false,
+        "policyReason": "AI recommendation (send_reminder) accepted as-is.",
+        "nextAttemptEligibleAt": "2026-09-01T07:11:13.962Z"
+      }
+    ],
+    "paymentAttempts": [
+      {
+        "id": "55f41b32-cd6c-4c34-999e-9a1e23dc35af",
+        "recoveryAttemptNumber": 1,
+        "status": "failed",
+        "amount": 1500,
+        "failureReason": "bank_decline",
+        "createdAt": "2026-08-31T19:11:13.962Z",
+        "updatedAt": "2026-08-31T19:11:13.962Z"
+      }
+    ],
+    "nextEligibleAttemptDate": "2026-09-01T07:11:13.962Z"
   },
   {
     "id": "TXN-0011",
@@ -129,9 +392,41 @@
     "trueFailureReason": "bank_decline",
     "gatewayErrorHint": "Transaction declined by the issuing bank. No further reason code provided.",
     "createdAt": "2026-08-18T00:26:00.000Z",
-    "status": "pending",
-    "attempts": [],
-    "paymentAttempts": []
+    "status": "in_progress",
+    "attempts": [
+      {
+        "attemptNumber": 1,
+        "timestamp": "2026-08-31T19:10:28.351Z",
+        "diagnosedReason": "bank_decline",
+        "recommendedAction": "retry_payment_same_method",
+        "actionTaken": "generated_payment_link",
+        "actionDetail": "We're re-attempting your payment of ₹2650 (same method). Complete it securely here: https://rzp.io/rzp/mTKarvZa",
+        "outcome": "no_response",
+        "confidence": "high",
+        "recoveryProbability": 0.4,
+        "priority": "high",
+        "diagnosisRationale": "The gateway reported a bank decline, indicating the issuing bank rejected the payment; retrying with the same card can succeed if the issue is transient or the balance is now sufficient.",
+        "decisionAction": "generate_payment_link",
+        "policyOverridden": false,
+        "policyReason": "AI recommendation (generate_payment_link) accepted as-is.",
+        "paymentLinkId": "plink_TWUHMVz4HoJkRB",
+        "paymentLinkUrl": "https://rzp.io/rzp/mTKarvZa",
+        "nextAttemptEligibleAt": "2026-09-01T07:10:28.351Z"
+      }
+    ],
+    "paymentAttempts": [
+      {
+        "id": "14d0c74f-0255-415a-9e3d-f704dc5ea17f",
+        "recoveryAttemptNumber": 1,
+        "status": "failed",
+        "amount": 2650,
+        "paymentLinkId": "plink_TWUHMVz4HoJkRB",
+        "createdAt": "2026-08-31T19:10:28.351Z",
+        "updatedAt": "2026-08-31T19:10:28.351Z",
+        "failureReason": "bank_decline"
+      }
+    ],
+    "nextEligibleAttemptDate": "2026-09-01T07:10:28.351Z"
   },
   {
     "id": "TXN-0012",
@@ -152,9 +447,35 @@
     "type": "checkout_abandoned",
     "trueFailureReason": "checkout_abandonment",
     "createdAt": "2026-08-19T03:43:00.000Z",
-    "status": "pending",
-    "attempts": [],
-    "paymentAttempts": []
+    "status": "recovered",
+    "attempts": [
+      {
+        "attemptNumber": 1,
+        "timestamp": "2026-08-31T19:12:18.360Z",
+        "diagnosedReason": "checkout_abandonment",
+        "recommendedAction": "send_whatsapp_reminder",
+        "actionTaken": "sent_reminder",
+        "actionDetail": "Hi Priya, we noticed your order of ₹2500 was left incomplete. Could you let us know if you'd like to complete the purchase or need assistance?",
+        "outcome": "paid",
+        "confidence": "high",
+        "recoveryProbability": 0.65,
+        "priority": "medium",
+        "diagnosisRationale": "The order shows as a checkout abandonment with no failure code; the customer has no prior transaction history, so a direct outreach via WhatsApp is likely to re-engage them.",
+        "decisionAction": "send_reminder",
+        "policyOverridden": false,
+        "policyReason": "AI recommendation (send_reminder) accepted as-is."
+      }
+    ],
+    "paymentAttempts": [
+      {
+        "id": "5bb6be71-4c73-4fcc-8f3d-fd87bfaeca13",
+        "recoveryAttemptNumber": 1,
+        "status": "captured",
+        "amount": 2500,
+        "createdAt": "2026-08-31T19:12:18.360Z",
+        "updatedAt": "2026-08-31T19:12:18.360Z"
+      }
+    ]
   },
   {
     "id": "TXN-0014",
@@ -163,9 +484,35 @@
     "type": "checkout_abandoned",
     "trueFailureReason": "checkout_abandonment",
     "createdAt": "2026-08-19T20:05:00.000Z",
-    "status": "pending",
-    "attempts": [],
-    "paymentAttempts": []
+    "status": "recovered",
+    "attempts": [
+      {
+        "attemptNumber": 1,
+        "timestamp": "2026-08-31T19:14:30.405Z",
+        "diagnosedReason": "checkout_abandonment",
+        "recommendedAction": "send_sms_reminder",
+        "actionTaken": "sent_reminder",
+        "actionDetail": "Hi Sneha, we noticed you left some items in your cart. If you'd like to complete your purchase, just tap here to finish your order. Thank you!",
+        "outcome": "paid",
+        "confidence": "high",
+        "recoveryProbability": 0.6,
+        "priority": "medium",
+        "diagnosisRationale": "The transaction was marked as checkout abandoned with no gateway errors or previous failures; this indicates the customer left the checkout process unfinished, so a reminder is likely to recover the sale.",
+        "decisionAction": "send_reminder",
+        "policyOverridden": false,
+        "policyReason": "AI recommendation (send_reminder) accepted as-is."
+      }
+    ],
+    "paymentAttempts": [
+      {
+        "id": "8ffee669-cd74-44b8-9bff-5b0f6bedcfb1",
+        "recoveryAttemptNumber": 1,
+        "status": "captured",
+        "amount": 3850,
+        "createdAt": "2026-08-31T19:14:30.405Z",
+        "updatedAt": "2026-08-31T19:14:30.405Z"
+      }
+    ]
   },
   {
     "id": "TXN-0015",
@@ -175,9 +522,35 @@
     "trueFailureReason": "card_failure",
     "gatewayErrorHint": "Card declined by issuer — reason code 05 (do not honor).",
     "createdAt": "2026-08-20T01:16:00.000Z",
-    "status": "pending",
-    "attempts": [],
-    "paymentAttempts": []
+    "status": "recovered",
+    "attempts": [
+      {
+        "attemptNumber": 1,
+        "timestamp": "2026-08-31T19:10:53.793Z",
+        "diagnosedReason": "bank_decline",
+        "recommendedAction": "send_email_reminder",
+        "actionTaken": "sent_email_reminder",
+        "actionDetail": "Dear Swati, we couldn't process your subscription payment. Please review your card details or try again. Thank you.",
+        "outcome": "paid",
+        "confidence": "high",
+        "recoveryProbability": 0.35,
+        "priority": "high",
+        "diagnosisRationale": "Issuer declined with reason code 05 (do not honor), indicating a bank decline; first attempt with no prior recoveries.",
+        "decisionAction": "send_email",
+        "policyOverridden": false,
+        "policyReason": "AI recommendation (send_email) accepted as-is."
+      }
+    ],
+    "paymentAttempts": [
+      {
+        "id": "0d759553-fa2d-4620-9209-ce9ebef3701c",
+        "recoveryAttemptNumber": 1,
+        "status": "captured",
+        "amount": 3150,
+        "createdAt": "2026-08-31T19:10:53.792Z",
+        "updatedAt": "2026-08-31T19:10:53.792Z"
+      }
+    ]
   },
   {
     "id": "TXN-0016",
@@ -186,9 +559,35 @@
     "type": "invoice_overdue",
     "trueFailureReason": "overdue_payment",
     "createdAt": "2026-08-21T18:20:00.000Z",
-    "status": "pending",
-    "attempts": [],
-    "paymentAttempts": []
+    "status": "recovered",
+    "attempts": [
+      {
+        "attemptNumber": 1,
+        "timestamp": "2026-08-31T19:11:25.206Z",
+        "diagnosedReason": "overdue_payment",
+        "recommendedAction": "send_email_reminder",
+        "actionTaken": "sent_email_reminder",
+        "actionDetail": "Dear Manoj Pillai, we noticed your payment of ₹8750 for your invoice is still pending. Please complete the payment at your earliest convenience.",
+        "outcome": "paid",
+        "confidence": "medium",
+        "recoveryProbability": 0.45,
+        "priority": "high",
+        "diagnosisRationale": "The invoice is overdue and this is the first payment attempt, so a courteous email reminder is the most appropriate recovery step.",
+        "decisionAction": "send_email",
+        "policyOverridden": false,
+        "policyReason": "AI recommendation (send_email) accepted as-is."
+      }
+    ],
+    "paymentAttempts": [
+      {
+        "id": "256ae79b-2dde-4836-8b6e-361dd3d8e8c4",
+        "recoveryAttemptNumber": 1,
+        "status": "captured",
+        "amount": 8750,
+        "createdAt": "2026-08-31T19:11:25.206Z",
+        "updatedAt": "2026-08-31T19:11:25.206Z"
+      }
+    ]
   },
   {
     "id": "TXN-0017",
@@ -198,8 +597,28 @@
     "trueFailureReason": "insufficient_funds",
     "gatewayErrorHint": "Auto-debit failed — issuing bank reported insufficient funds at time of debit.",
     "createdAt": "2026-08-22T09:35:00.000Z",
-    "status": "pending",
-    "attempts": [],
+    "status": "escalated",
+    "attempts": [
+      {
+        "attemptNumber": 1,
+        "timestamp": "2026-08-31T19:11:36.033Z",
+        "diagnosedReason": "insufficient_funds",
+        "recommendedAction": "retry_payment_alternate_method",
+        "actionTaken": "escalated_to_human",
+        "actionDetail": "Order amount ₹12300 is at or above the configured high-value threshold (₹10000); a human reviews this before automation acts.",
+        "outcome": "no_response",
+        "confidence": "high",
+        "recoveryProbability": 0.45,
+        "priority": "high",
+        "diagnosisRationale": "Gateway error shows insufficient funds; retrying same method likely to fail again, so offering an alternate payment method increases the chance of success.",
+        "decisionAction": "escalate_to_human",
+        "policyOverridden": true,
+        "policyReason": "Order amount ₹12300 is at or above the configured high-value threshold (₹10000); a human reviews this before automation acts.",
+        "escalationReasons": [
+          "high_value_transaction"
+        ]
+      }
+    ],
     "paymentAttempts": []
   },
   {
@@ -209,8 +628,28 @@
     "type": "invoice_overdue",
     "trueFailureReason": "overdue_payment",
     "createdAt": "2026-08-23T02:19:00.000Z",
-    "status": "pending",
-    "attempts": [],
+    "status": "escalated",
+    "attempts": [
+      {
+        "attemptNumber": 1,
+        "timestamp": "2026-08-31T19:12:56.586Z",
+        "diagnosedReason": "overdue_payment",
+        "recommendedAction": "send_email_reminder",
+        "actionTaken": "escalated_to_human",
+        "actionDetail": "Order amount ₹12900 is at or above the configured high-value threshold (₹10000); a human reviews this before automation acts.",
+        "outcome": "no_response",
+        "confidence": "high",
+        "recoveryProbability": 0.6,
+        "priority": "high",
+        "diagnosisRationale": "The invoice is overdue and this is the first recovery attempt; an email reminder is likely to prompt the customer to settle the payment.",
+        "decisionAction": "escalate_to_human",
+        "policyOverridden": true,
+        "policyReason": "Order amount ₹12900 is at or above the configured high-value threshold (₹10000); a human reviews this before automation acts.",
+        "escalationReasons": [
+          "high_value_transaction"
+        ]
+      }
+    ],
     "paymentAttempts": []
   },
   {
@@ -220,9 +659,35 @@
     "type": "checkout_abandoned",
     "trueFailureReason": "checkout_abandonment",
     "createdAt": "2026-08-23T19:57:00.000Z",
-    "status": "pending",
-    "attempts": [],
-    "paymentAttempts": []
+    "status": "recovered",
+    "attempts": [
+      {
+        "attemptNumber": 1,
+        "timestamp": "2026-08-31T19:11:31.075Z",
+        "diagnosedReason": "checkout_abandonment",
+        "recommendedAction": "send_email_reminder",
+        "actionTaken": "sent_email_reminder",
+        "actionDetail": "Dear Priyanka, we noticed your checkout for ₹5150 was not completed. Please confirm your payment to complete the order. If you need assistance, let us know.",
+        "outcome": "paid",
+        "confidence": "high",
+        "recoveryProbability": 0.5,
+        "priority": "medium",
+        "diagnosisRationale": "Transaction marked as checkout_abandonment with no prior failures and first attempt, indicating incomplete checkout; high confidence that a reminder can recover the order.",
+        "decisionAction": "send_email",
+        "policyOverridden": false,
+        "policyReason": "AI recommendation (send_email) accepted as-is."
+      }
+    ],
+    "paymentAttempts": [
+      {
+        "id": "a68187f2-01f8-48b1-a49f-af985504b04d",
+        "recoveryAttemptNumber": 1,
+        "status": "captured",
+        "amount": 5150,
+        "createdAt": "2026-08-31T19:11:31.075Z",
+        "updatedAt": "2026-08-31T19:11:31.075Z"
+      }
+    ]
   },
   {
     "id": "TXN-0020",
@@ -243,8 +708,28 @@
     "type": "invoice_overdue",
     "trueFailureReason": "overdue_payment",
     "createdAt": "2026-08-24T04:33:00.000Z",
-    "status": "pending",
-    "attempts": [],
+    "status": "escalated",
+    "attempts": [
+      {
+        "attemptNumber": 1,
+        "timestamp": "2026-08-31T19:12:06.735Z",
+        "diagnosedReason": "overdue_payment",
+        "recommendedAction": "send_email_reminder",
+        "actionTaken": "escalated_to_human",
+        "actionDetail": "Order amount ₹12950 is at or above the configured high-value threshold (₹10000); a human reviews this before automation acts.",
+        "outcome": "no_response",
+        "confidence": "high",
+        "recoveryProbability": 0.4,
+        "priority": "high",
+        "diagnosisRationale": "The transaction is marked as an overdue invoice with no prior successful or failed attempts, indicating a clear overdue situation. The customer has no history of prior recovery attempts, so a gentle email reminder is appropriate.",
+        "decisionAction": "escalate_to_human",
+        "policyOverridden": true,
+        "policyReason": "Order amount ₹12950 is at or above the configured high-value threshold (₹10000); a human reviews this before automation acts.",
+        "escalationReasons": [
+          "high_value_transaction"
+        ]
+      }
+    ],
     "paymentAttempts": []
   },
   {
@@ -255,8 +740,28 @@
     "trueFailureReason": "bank_decline",
     "gatewayErrorHint": "Transaction declined by the issuing bank. No further reason code provided.",
     "createdAt": "2026-08-24T17:53:00.000Z",
-    "status": "pending",
-    "attempts": [],
+    "status": "escalated",
+    "attempts": [
+      {
+        "attemptNumber": 1,
+        "timestamp": "2026-08-31T19:12:44.566Z",
+        "diagnosedReason": "bank_decline",
+        "recommendedAction": "retry_payment_same_method",
+        "actionTaken": "escalated_to_human",
+        "actionDetail": "Order amount ₹13950 is at or above the configured high-value threshold (₹10000); a human reviews this before automation acts.",
+        "outcome": "no_response",
+        "confidence": "high",
+        "recoveryProbability": 0.4,
+        "priority": "high",
+        "diagnosisRationale": "Gateway returned a clear bank decline without further details, indicating the issuer rejected the transaction; retrying with the same method is the next logical step.",
+        "decisionAction": "escalate_to_human",
+        "policyOverridden": true,
+        "policyReason": "Order amount ₹13950 is at or above the configured high-value threshold (₹10000); a human reviews this before automation acts.",
+        "escalationReasons": [
+          "high_value_transaction"
+        ]
+      }
+    ],
     "paymentAttempts": []
   },
   {
@@ -267,9 +772,35 @@
     "trueFailureReason": "card_failure",
     "gatewayErrorHint": "Card declined — issuer reports the card has expired.",
     "createdAt": "2026-08-24T20:43:00.000Z",
-    "status": "pending",
-    "attempts": [],
-    "paymentAttempts": []
+    "status": "recovered",
+    "attempts": [
+      {
+        "attemptNumber": 1,
+        "timestamp": "2026-08-31T19:13:13.000Z",
+        "diagnosedReason": "card_failure",
+        "recommendedAction": "send_email_reminder",
+        "actionTaken": "sent_email_reminder",
+        "actionDetail": "Hi Tanvi, we couldn’t process your subscription because the card on file has expired. Please update your payment information to keep your service active. Let us know if you need assistance!",
+        "outcome": "paid",
+        "confidence": "high",
+        "recoveryProbability": 0.55,
+        "priority": "medium",
+        "diagnosisRationale": "The gateway error explicitly states the card has expired, indicating a card_failure. No prior recovery attempts exist, so a prompt to update payment details offers a good chance of success.",
+        "decisionAction": "send_email",
+        "policyOverridden": false,
+        "policyReason": "AI recommendation (send_email) accepted as-is."
+      }
+    ],
+    "paymentAttempts": [
+      {
+        "id": "fd9a8ea5-8a02-4580-bf78-0683d081a3ef",
+        "recoveryAttemptNumber": 1,
+        "status": "captured",
+        "amount": 2950,
+        "createdAt": "2026-08-31T19:13:13.000Z",
+        "updatedAt": "2026-08-31T19:13:13.000Z"
+      }
+    ]
   },
   {
     "id": "TXN-0024",
@@ -279,9 +810,38 @@
     "trueFailureReason": "insufficient_funds",
     "gatewayErrorHint": "Declined by issuing bank — reason code 51 (insufficient funds).",
     "createdAt": "2026-08-24T22:37:00.000Z",
-    "status": "pending",
-    "attempts": [],
-    "paymentAttempts": []
+    "status": "in_progress",
+    "attempts": [
+      {
+        "attemptNumber": 1,
+        "timestamp": "2026-08-31T19:12:31.752Z",
+        "diagnosedReason": "insufficient_funds",
+        "recommendedAction": "send_sms_reminder",
+        "actionTaken": "sent_reminder",
+        "actionDetail": "Hi Aditya, it looks like the recent payment failed due to insufficient funds. Please add balance to your account and try again, or let us know if you need any assistance.",
+        "outcome": "no_response",
+        "confidence": "high",
+        "recoveryProbability": 0.35,
+        "priority": "high",
+        "diagnosisRationale": "Gateway error explicitly states insufficient funds (reason code 51), indicating the customer’s account balance is inadequate for the payment.",
+        "decisionAction": "send_reminder",
+        "policyOverridden": false,
+        "policyReason": "AI recommendation (send_reminder) accepted as-is.",
+        "nextAttemptEligibleAt": "2026-09-02T19:12:31.752Z"
+      }
+    ],
+    "paymentAttempts": [
+      {
+        "id": "744417ab-91ee-4321-b137-fd88331f86eb",
+        "recoveryAttemptNumber": 1,
+        "status": "failed",
+        "amount": 1250,
+        "failureReason": "insufficient_funds",
+        "createdAt": "2026-08-31T19:12:31.752Z",
+        "updatedAt": "2026-08-31T19:12:31.752Z"
+      }
+    ],
+    "nextEligibleAttemptDate": "2026-09-02T19:12:31.752Z"
   },
   {
     "id": "TXN-0025",
@@ -291,8 +851,28 @@
     "trueFailureReason": "card_failure",
     "gatewayErrorHint": "Card declined — issuer reports the card is blocked or restricted.",
     "createdAt": "2026-08-25T07:09:00.000Z",
-    "status": "pending",
-    "attempts": [],
+    "status": "escalated",
+    "attempts": [
+      {
+        "attemptNumber": 1,
+        "timestamp": "2026-08-31T19:13:25.969Z",
+        "diagnosedReason": "card_failure",
+        "recommendedAction": "retry_payment_alternate_method",
+        "actionTaken": "escalated_to_human",
+        "actionDetail": "Order amount ₹11750 is at or above the configured high-value threshold (₹10000); a human reviews this before automation acts.",
+        "outcome": "no_response",
+        "confidence": "high",
+        "recoveryProbability": 0.3,
+        "priority": "high",
+        "diagnosisRationale": "Gateway indicated the card was blocked, which points to a card failure. No prior attempts or history support another cause, so confidence is high.",
+        "decisionAction": "escalate_to_human",
+        "policyOverridden": true,
+        "policyReason": "Order amount ₹11750 is at or above the configured high-value threshold (₹10000); a human reviews this before automation acts.",
+        "escalationReasons": [
+          "high_value_transaction"
+        ]
+      }
+    ],
     "paymentAttempts": []
   },
   {
@@ -303,9 +883,38 @@
     "trueFailureReason": "authentication_failure",
     "gatewayErrorHint": "Payment failed — 3-D Secure / OTP authentication was not completed in time.",
     "createdAt": "2026-08-25T20:00:00.000Z",
-    "status": "pending",
-    "attempts": [],
-    "paymentAttempts": []
+    "status": "in_progress",
+    "attempts": [
+      {
+        "attemptNumber": 1,
+        "timestamp": "2026-08-31T19:13:40.173Z",
+        "diagnosedReason": "authentication_failure",
+        "recommendedAction": "send_sms_reminder",
+        "actionTaken": "sent_reminder",
+        "actionDetail": "Hi Divya, we noticed your payment didn't complete. Please finish the authentication step on your device to finalize your purchase. Thanks!",
+        "outcome": "no_response",
+        "confidence": "high",
+        "recoveryProbability": 0.6,
+        "priority": "medium",
+        "diagnosisRationale": "Gateway error indicates OTP/3DS authentication timeout, so authentication_failure is the clear root cause. A SMS reminder should prompt the customer to complete the authentication.",
+        "decisionAction": "send_reminder",
+        "policyOverridden": false,
+        "policyReason": "AI recommendation (send_reminder) accepted as-is.",
+        "nextAttemptEligibleAt": "2026-09-01T01:13:40.173Z"
+      }
+    ],
+    "paymentAttempts": [
+      {
+        "id": "c9e58822-df59-40e7-a5b0-1fff5c0ecb96",
+        "recoveryAttemptNumber": 1,
+        "status": "failed",
+        "amount": 1750,
+        "failureReason": "authentication_failure",
+        "createdAt": "2026-08-31T19:13:40.173Z",
+        "updatedAt": "2026-08-31T19:13:40.173Z"
+      }
+    ],
+    "nextEligibleAttemptDate": "2026-09-01T01:13:40.173Z"
   },
   {
     "id": "TXN-0027",
@@ -315,9 +924,38 @@
     "trueFailureReason": "insufficient_funds",
     "gatewayErrorHint": "Auto-debit failed — issuing bank reported insufficient funds at time of debit.",
     "createdAt": "2026-08-27T19:29:00.000Z",
-    "status": "pending",
-    "attempts": [],
-    "paymentAttempts": []
+    "status": "in_progress",
+    "attempts": [
+      {
+        "attemptNumber": 1,
+        "timestamp": "2026-08-31T19:13:17.711Z",
+        "diagnosedReason": "insufficient_funds",
+        "recommendedAction": "send_email_reminder",
+        "actionTaken": "sent_email_reminder",
+        "actionDetail": "Dear Varun, we were unable to process your invoice payment due to insufficient funds. Please add sufficient balance to your account and retry the payment. Thank you.",
+        "outcome": "no_response",
+        "confidence": "high",
+        "recoveryProbability": 0.45,
+        "priority": "medium",
+        "diagnosisRationale": "Gateway error explicitly indicates insufficient funds; high confidence. Recovery probability moderate due to no prior successful payments; email reminder is a low effort step to prompt funding.",
+        "decisionAction": "send_email",
+        "policyOverridden": false,
+        "policyReason": "AI recommendation (send_email) accepted as-is.",
+        "nextAttemptEligibleAt": "2026-09-02T19:13:17.711Z"
+      }
+    ],
+    "paymentAttempts": [
+      {
+        "id": "698271d7-1448-4807-b67a-6f8b10a07f28",
+        "recoveryAttemptNumber": 1,
+        "status": "failed",
+        "amount": 5850,
+        "failureReason": "insufficient_funds",
+        "createdAt": "2026-08-31T19:13:17.711Z",
+        "updatedAt": "2026-08-31T19:13:17.711Z"
+      }
+    ],
+    "nextEligibleAttemptDate": "2026-09-02T19:13:17.711Z"
   },
   {
     "id": "TXN-0028",
@@ -326,8 +964,34 @@
     "type": "invoice_overdue",
     "trueFailureReason": "overdue_payment",
     "createdAt": "2026-08-29T06:21:00.000Z",
-    "status": "pending",
-    "attempts": [],
-    "paymentAttempts": []
+    "status": "recovered",
+    "attempts": [
+      {
+        "attemptNumber": 1,
+        "timestamp": "2026-08-31T19:13:06.130Z",
+        "diagnosedReason": "overdue_payment",
+        "recommendedAction": "send_email_reminder",
+        "actionTaken": "sent_email_reminder",
+        "actionDetail": "Dear Meera, we noticed your invoice of ₹7100 is still pending. Please complete the payment at your earliest convenience. Thank you.",
+        "outcome": "paid",
+        "confidence": "high",
+        "recoveryProbability": 0.4,
+        "priority": "critical",
+        "diagnosisRationale": "Invoice is marked overdue and the customer has not yet completed payment; a polite email reminder is likely the best initial step.",
+        "decisionAction": "send_email",
+        "policyOverridden": false,
+        "policyReason": "AI recommendation (send_email) accepted as-is."
+      }
+    ],
+    "paymentAttempts": [
+      {
+        "id": "d2931f9f-81bb-42ae-a344-c4d74d014e22",
+        "recoveryAttemptNumber": 1,
+        "status": "captured",
+        "amount": 7100,
+        "createdAt": "2026-08-31T19:13:06.130Z",
+        "updatedAt": "2026-08-31T19:13:06.130Z"
+      }
+    ]
   }
 ]

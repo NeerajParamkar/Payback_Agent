@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { runAgentForTransaction } from "@/lib/agent";
 import { finishBatch, incrementBatch, setBatchStage, startBatch } from "@/lib/batch-progress";
-import { buildCustomerRecoveryProfiles, customerIdentityKey } from "@/lib/customer-recovery";
+import {
+  buildAveragePastAmountByCustomer,
+  buildCustomerRecoveryProfiles,
+  customerIdentityKey,
+} from "@/lib/customer-recovery";
+import { readCustomerHistoryTransactions } from "@/lib/customer-history-store";
 import type { CustomerHistoryContext } from "@/lib/diagnose";
 import { markCaseAnalysing, upsertRecoveryCases } from "@/lib/recovery-case";
 import { readRecoveryCases, writeRecoveryCases } from "@/lib/recovery-case-store";
@@ -15,7 +20,8 @@ import type { Transaction } from "@/lib/types";
 // Lightweight projection of a CustomerRecoveryProfile fed to the diagnosis prompt -
 // see CustomerHistoryContext in lib/diagnose.ts for what each field means.
 function toCustomerHistory(
-  profile: ReturnType<typeof buildCustomerRecoveryProfiles>[number]
+  profile: ReturnType<typeof buildCustomerRecoveryProfiles>[number],
+  averagePastAmount: number | null
 ): CustomerHistoryContext {
   return {
     totalTransactions: profile.totalTransactions,
@@ -25,6 +31,7 @@ function toCustomerHistory(
     successfulRecoveryActions: profile.successfulRecoveryActions,
     failedRecoveryActions: profile.failedRecoveryActions,
     preferredRecoveryChannel: profile.preferredRecoveryChannel,
+    averagePastAmount,
   };
 }
 
@@ -117,10 +124,22 @@ export async function POST(request: NextRequest) {
     // Computed once up front from the pre-run snapshot, not recomputed per
     // transaction - so a customer's history reflects their established pattern
     // from before this run, not attempts happening within this same batch call.
+    // Includes permanent customer history (lib/customer-history-store.ts) -
+    // past, already-resolved transactions - so a customer's diagnosis prompt
+    // reflects their real track record, not just whatever's in this one batch.
     setBatchStage("analysing_customer_history");
+    const customerHistoryTransactions = await readCustomerHistoryTransactions();
     const customerProfilesById = new Map(
-      buildCustomerRecoveryProfiles(transactions).map((p) => [p.customerId, p])
+      buildCustomerRecoveryProfiles([...customerHistoryTransactions, ...transactions]).map((p) => [
+        p.customerId,
+        p,
+      ])
     );
+    // Deliberately built from PAST history only (never the current batch) -
+    // see buildAveragePastAmountByCustomer's own doc comment for why mixing
+    // in the transaction being diagnosed would mask the exact spike it's
+    // meant to catch.
+    const averagePastAmountByCustomer = buildAveragePastAmountByCustomer(customerHistoryTransactions);
 
     // Transactions another overlapping request was already holding the lock for -
     // this run's own copy of them is stale (unmodified from its initial read) and
@@ -140,10 +159,13 @@ export async function POST(request: NextRequest) {
         if (selectedSet && !selectedSet.has(transaction.id)) {
           return transaction; // not part of this run — left untouched
         }
-        const profile = customerProfilesById.get(customerIdentityKey(transaction));
+        const identityKey = customerIdentityKey(transaction);
+        const profile = customerProfilesById.get(identityKey);
         const { transaction: result, error, locked } = await runAgentForTransaction(
           transaction,
-          profile ? toCustomerHistory(profile) : undefined
+          profile
+            ? toCustomerHistory(profile, averagePastAmountByCustomer.get(identityKey) ?? null)
+            : undefined
         );
         if (error) {
           errors[transaction.id] = error;

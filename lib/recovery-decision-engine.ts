@@ -267,6 +267,41 @@ export function decideRecoveryAction(input: RecoveryDecisionInput): RecoveryDeci
     }
   }
 
+  // 4b. A flat threshold alone misses a real anomaly: a customer who
+  // normally transacts small amounts suddenly attempting something many
+  // times their own historical average is a meaningful signal on its own -
+  // e.g. a customer who usually pays ₹100 suddenly attempting ₹5,000 is
+  // worth a human's eyes even though ₹5,000 alone would never cross the
+  // flat high-value threshold above. Checked only on the first attempt, same
+  // as rule 4, and only when this customer actually has a known baseline to
+  // compare against (a brand-new customer has nothing to be "sudden" relative to).
+  // Deliberately does NOT skip when rule 4 already escalated - an order that's
+  // both high-value AND a spike for this specific customer should carry both
+  // reasons, the same way multiple manual flags (rule 0) all accumulate.
+  if (
+    input.attemptCount === 0 &&
+    action !== "stop" &&
+    input.customerHistory?.averagePastAmount &&
+    input.customerHistory.averagePastAmount > 0
+  ) {
+    const baseline = input.customerHistory.averagePastAmount;
+    const spikeRatio = input.amount / baseline;
+    const withinNormalRange = spikeRatio < input.config.amountSpikeMultiplier;
+    checks.push({
+      rule: "no_unusual_amount_spike",
+      passed: withinNormalRange,
+      detail: withinNormalRange
+        ? `Amount ₹${input.amount} is ${spikeRatio.toFixed(1)}x this customer's average (₹${Math.round(baseline)}) - within their normal range.`
+        : `Amount ₹${input.amount} is ${spikeRatio.toFixed(1)}x this customer's usual average (₹${Math.round(baseline)}) - an unusual spike for them specifically, regardless of the flat high-value threshold.`,
+    });
+    if (!withinNormalRange) {
+      escalate(
+        `Order amount ₹${input.amount} is ${spikeRatio.toFixed(1)}x this customer's typical transaction (₹${Math.round(baseline)}) - an unusual spike worth a human's review before automation acts.`,
+        "unusual_amount_spike"
+      );
+    }
+  }
+
   // 5. Confidence that's still low beyond the very first attempt is a sign
   // this case genuinely doesn't fit the model well - hand it to a human
   // instead of continuing to guess (distinct from rule 9 below, which only

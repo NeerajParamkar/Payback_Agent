@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { buildCustomerRecoveryProfiles, customerIdentityKey } from "@/lib/customer-recovery";
+import { readCustomerHistoryTransactions } from "@/lib/customer-history-store";
 import { readTransactions } from "@/lib/transactions-store";
 
 // One customer's full profile plus every transaction of theirs, newest
@@ -14,15 +15,19 @@ export async function GET(
   const customerId = decodeURIComponent(rawId);
 
   try {
-    const transactions = await readTransactions();
-    const customer = buildCustomerRecoveryProfiles(transactions).find(
+    const [transactions, history] = await Promise.all([
+      readTransactions(),
+      readCustomerHistoryTransactions(),
+    ]);
+    const allTransactions = [...history, ...transactions];
+    const customer = buildCustomerRecoveryProfiles(allTransactions).find(
       (c) => c.customerId === customerId
     );
     if (!customer) {
       return NextResponse.json({ error: "Customer not found." }, { status: 404 });
     }
 
-    const customerTransactions = transactions
+    const customerTransactions = allTransactions
       .filter((t) => customerIdentityKey(t) === customerId)
       .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 

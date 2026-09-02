@@ -39,6 +39,14 @@ export interface CustomerHistoryContext {
   successfulRecoveryActions: number;
   failedRecoveryActions: number;
   preferredRecoveryChannel: string | null;
+  // This customer's own average transaction amount across their PAST
+  // (already-resolved) history only - never includes the transaction
+  // currently being diagnosed. null when there's no history yet. Lets the
+  // Recovery Decision Engine (lib/recovery-decision-engine.ts) catch a
+  // sudden spike relative to this specific customer's normal pattern, which
+  // a flat high-value threshold alone would miss for anyone whose typical
+  // spend sits well under it.
+  averagePastAmount: number | null;
 }
 
 export interface DiagnoseInput {
@@ -136,7 +144,11 @@ function formatCustomerHistory(history: CustomerHistoryContext): string {
   const channelLine = history.preferredRecoveryChannel
     ? ` Channel that has worked for them before: ${history.preferredRecoveryChannel}.`
     : "";
-  return `\nCustomer history across all their transactions: ${history.totalTransactions} total, ${history.successfulTransactions} successful, ${history.failedTransactions} failed. ${history.previousRecoveryAttempts} previous recovery attempts (${history.successfulRecoveryActions} successful, ${history.failedRecoveryActions} failed).${channelLine}`;
+  const avgAmountLine =
+    history.averagePastAmount !== null
+      ? ` This customer's average past transaction was ₹${Math.round(history.averagePastAmount)}.`
+      : "";
+  return `\nCustomer history across all their transactions: ${history.totalTransactions} total, ${history.successfulTransactions} successful, ${history.failedTransactions} failed. ${history.previousRecoveryAttempts} previous recovery attempts (${history.successfulRecoveryActions} successful, ${history.failedRecoveryActions} failed).${channelLine}${avgAmountLine}`;
 }
 
 export async function diagnoseTransaction(
