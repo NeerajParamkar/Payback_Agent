@@ -5,88 +5,13 @@
     "customerName": "Siddharth Rao",
     "amount": 13550,
     "rootCause": "bank_decline",
-    "recoveryScore": 35,
-    "recoveryProbability": 0.35,
+    "recoveryScore": 70,
+    "recoveryProbability": 0.7,
     "reasons": [
       "high_value_transaction"
     ],
     "status": "open",
-    "createdAt": "2026-08-31T19:13:40.182Z",
-    "updatedAt": "2026-08-31T19:13:40.182Z"
-  },
-  {
-    "id": "ESC-0017",
-    "transactionId": "TXN-0017",
-    "customerName": "Ananya Desai",
-    "amount": 12300,
-    "rootCause": "insufficient_funds",
-    "recoveryScore": 45,
-    "recoveryProbability": 0.45,
-    "reasons": [
-      "high_value_transaction"
-    ],
-    "status": "open",
-    "createdAt": "2026-08-31T19:13:40.182Z",
-    "updatedAt": "2026-08-31T19:13:40.182Z"
-  },
-  {
-    "id": "ESC-0018",
-    "transactionId": "TXN-0018",
-    "customerName": "Ritu Chawla",
-    "amount": 12900,
-    "rootCause": "overdue_payment",
-    "recoveryScore": 60,
-    "recoveryProbability": 0.6,
-    "reasons": [
-      "high_value_transaction"
-    ],
-    "status": "open",
-    "createdAt": "2026-08-31T19:13:40.182Z",
-    "updatedAt": "2026-08-31T19:13:40.182Z"
-  },
-  {
-    "id": "ESC-0021",
-    "transactionId": "TXN-0021",
-    "customerName": "Harsh Vora",
-    "amount": 12950,
-    "rootCause": "overdue_payment",
-    "recoveryScore": 40,
-    "recoveryProbability": 0.4,
-    "reasons": [
-      "high_value_transaction"
-    ],
-    "status": "open",
-    "createdAt": "2026-08-31T19:13:40.182Z",
-    "updatedAt": "2026-08-31T19:13:40.182Z"
-  },
-  {
-    "id": "ESC-0022",
-    "transactionId": "TXN-0022",
-    "customerName": "Rajesh Kumar",
-    "amount": 13950,
-    "rootCause": "bank_decline",
-    "recoveryScore": 40,
-    "recoveryProbability": 0.4,
-    "reasons": [
-      "high_value_transaction"
-    ],
-    "status": "open",
-    "createdAt": "2026-08-31T19:13:40.182Z",
-    "updatedAt": "2026-08-31T19:13:40.182Z"
-  },
-  {
-    "id": "ESC-0025",
-    "transactionId": "TXN-0025",
-    "customerName": "Neha Gupta",
-    "amount": 11750,
-    "rootCause": "card_failure",
-    "recoveryScore": 30,
-    "recoveryProbability": 0.3,
-    "reasons": [
-      "high_value_transaction"
-    ],
-    "status": "open",
-    "createdAt": "2026-08-31T19:13:40.182Z",
-    "updatedAt": "2026-08-31T19:13:40.182Z"
+    "createdAt": "2026-09-05T15:24:36.767Z",
+    "updatedAt": "2026-09-05T15:24:36.767Z"
   }
 ]
